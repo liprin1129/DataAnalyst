@@ -13,10 +13,60 @@ I investigated an area where I am living in, and do some basic data wrangling ta
 This map is of my hometown, so I’m more interested to see what database querying reveals, and I’d like an opportunity to contribute to its improvement on OpenStreetMap.org.
 
 ## Data Audit
-For the first data audit task, '1\_unique\_tags.py' checks the unique tags and counts the number of tags.
+For the first data audit task, '1\_unique\_tags.py' counts the unique tags.
 
+Name | Count
+------------ | -------------
+node          | 1082390
+nd              | 1395801
+bounds      | 1
+member      | 23781
+tag              | 431569
+relation        | 2196
+way             | 174004
+osm            | 1
 
+**node**, **nd**, **member**, **tag**, **relation**, and **way** seem having resoanable number of counts. Then, I will audit further those elements for what kind of features are included in it and whether those cause any problematic outcomes.
 
+	```Python
+	< node >
+	changeset : set([<type 'int'>])
+	uid : set([<type 'int'>])
+	timestamp : set([<type 'datetime.datetime'>])
+	lon : set([<type 'float'>])
+	version : set([<type 'int'>])
+	user : set([<type 'str'>])
+	lat : set([<type 'float'>])
+	id : set([<type 'int'>])
+	
+	< nd >
+	ref : set([<type 'int'>])
+	
+	< member >
+	ref : set([<type 'int'>])
+	role : set([<type 'str'>])
+	type : set([<type 'str'>])
+	
+	< tag >
+	k : set([<type 'str'>])
+	v : set([<type 'int'>, <type 'str'>])
+	
+	< relation >
+	changeset : set([<type 'int'>])
+	uid : set([<type 'int'>])
+	timestamp : set([<type 'datetime.datetime'>])
+	version : set([<type 'int'>])
+	user : set([<type 'str'>])
+	id : set([<type 'int'>])
+	
+		< way >
+	changeset : set([<type 'int'>])
+	uid : set([<type 'int'>])
+	timestamp : set([<type 'datetime.datetime'>])
+	version : set([<type 'int'>])
+	user : set([<type 'str'>])
+	id : set([<type 'int'>])
+```
 ## Problems Encountered in the Map
 After initially downloading a small sample size of the Charlotte area and running it against a provisional data.py file, I noticed five main problems with the data, which I will discuss in the following order:
 

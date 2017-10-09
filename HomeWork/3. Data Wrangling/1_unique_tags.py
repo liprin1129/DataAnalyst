@@ -4,8 +4,8 @@ from collections import defaultdict
 from tqdm import tqdm
 
 #osm_file = "data/sample.osm"
-osm_file = "data/ex_VUBsnvgfVzCHpyoxLhnTYrc64M3F8.osm"
-
+#osm_file = "data/Sheffield/3000_sample.osm"
+osm_file = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
 def count_tags(file_name):
     node_types = defaultdict(int)
     
