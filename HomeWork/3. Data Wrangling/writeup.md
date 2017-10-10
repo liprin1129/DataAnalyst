@@ -26,7 +26,9 @@ relation        | 2196
 way             | 174004
 osm            | 1
 
-**node**, **nd**, **member**, **tag**, **relation**, and **way** seem having resoanable number of counts. Then, I will audit further those elements for what kind of features are included in it and whether those cause any problematic outcomes.
+**node**, **nd**, **member**, **tag**, **relation**, and **way** seem having resoanable number of counts. 
+
+So I checked the type of attribtues consisted of those elements. 
 
 	```Python
 	< node >
@@ -67,6 +69,23 @@ osm            | 1
 	user : set([<type 'str'>])
 	id : set([<type 'int'>])
 ```
+
+All nodes have unique attribute value except v value in tag element. However, it is not a problematic because tag elements hold various kind of values according to different keys. For example,
+
+```Python
+<tag k="name" v="Raeburn Road/Morland Drive" />
+<tag k="source" v="naptan_import" />
+<tag k="highway" v="bus_stop" />
+<tag k="alt_name" v="Raeburn Road/Morland Drive" />
+<tag k="naptan:Street" v="Raeburn Road" />
+<tag k="naptan:Bearing" v="N" />
+<tag k="naptan:AtcoCode" v="370026690" />
+<tag k="naptan:Landmark" v="Bottom of Steps" />
+```
+
+
+
+for what kind of features are included in it and whether those cause any problematic outcomes.
 ## Problems Encountered in the Map
 After initially downloading a small sample size of the Charlotte area and running it against a provisional data.py file, I noticed five main problems with the data, which I will discuss in the following order:
 
