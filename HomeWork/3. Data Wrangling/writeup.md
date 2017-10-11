@@ -12,7 +12,9 @@ I investigated an area where I am living in, and do some basic data wrangling ta
 
 This map is of my hometown, so I’m more interested to see what database querying reveals, and I’d like an opportunity to contribute to its improvement on OpenStreetMap.org.
 
-## Data Audit
+## 1. Data Audit
+
+#### 1.1. Unique tags
 For the first data audit task, '1\_unique\_tags.py' counts the unique tags.
 
 Name | Count
@@ -27,6 +29,8 @@ way             | 174004
 osm            | 1
 
 **node**, **nd**, **member**, **tag**, **relation**, and **way** seem having resoanable number of counts. 
+
+#### 1.2. Attributes types
 
 So I checked the type of attribtues consisted of those elements. 
 
@@ -70,7 +74,7 @@ So I checked the type of attribtues consisted of those elements.
 	id : set([<type 'int'>])
 ```
 
-All nodes have unique attribute value except v value in tag element. However, it is not a problematic because tag elements hold various kind of values according to different keys. For example,
+Type of major nodes seems not including critical issue, as all nodes have unique attribute value except attribute **v** in tag element. However, it is not a problematic because tag elements hold various kind of values accordingly different keys. For example,
 
 ```Python
 <tag k="name" v="Raeburn Road/Morland Drive" />
@@ -83,9 +87,114 @@ All nodes have unique attribute value except v value in tag element. However, it
 <tag k="naptan:Landmark" v="Bottom of Steps" />
 ```
 
+Above code has 8 different keys, **k**, in a tag's attribute; **name, source, highway, alt_name, naptan:Street, naptan:Bearing, naptan:AtcoCode, naptan:Landmark**, and types of those keys' value are either strings or numbers.
+
+#### 1.3. Key and value of tag attributes
+
+	```Python
+	<< node >>
+	highway: 7767
+	name: 6184
+	source: 5742
+	naptan:Street: 3800
+	naptan:AtcoCode: 3793
+	naptan:Landmark: 3771
+	naptan:verified: 3760
+	naptan:Indicator: 3749
+	naptan:CommonName: 3742
+	naptan:Bearing: 3729
+	naptan:PlusbusZoneRef: 3660
+	created_by: 2983
+	amenity: 2408
+	alt_name: 1739
+	naptan:AltCommonName: 1684
+	barrier: 1679
+	addr:housenumber: 1575
+	shop: 662
+	power: 653
+	crossing: 611
+	addr:street: 562
+	ref: 481
+	ele: 438
+	foot: 415
+	traffic_calming: 405
+	natural: 402
+	bicycle: 342
+	
+	<< relation >>
+	type: 2111
+	name: 1661
+	source: 1514
+	site: 1460
+	naptan:verified: 1448
+	naptan:StopAreaCode: 1445
+	naptan:StopAreaType: 1443
+	restriction: 206
+	route: 169
+	operator: 144
+	ref: 141
+	building: 80
+	boundary: 49
+	network: 41
+	landuse: 40
+	admin_level: 37
+	natural: 29
+	website: 24
+	to: 20
+	public_transport:version: 20
+	from: 20
+	wikidata: 16
+	highway: 16
+	amenity: 15
+	addr:street: 15
+	wikipedia: 13
+	addr:postcode: 13
+	service: 11
+	except: 11
+	designation: 11
+	addr:housenumber: 10
+	
+	<< way >>
+	building: 112076
+	source: 92744
+	highway: 38054
+	name: 20406
+	landuse: 8769
+	addr:housenumber: 4076
+	barrier: 3709
+	surface: 3569
+	addr:street: 3099
+	oneway: 2958
+	natural: 2794
+	maxspeed: 2784
+	foot: 2728
+	amenity: 2353
+	service: 2180
+	ref: 2023
+	lit: 2011
+	postal_code: 1577
+	addr:postcode: 1469
+	access: 1221
+	railway: 1173
+	leisure: 1145
+	lanes: 1073
+	addr:city: 1050
+	layer: 923
+	bridge: 910
+	bicycle: 910
+	shop: 889
+	gauge: 855
+	electrified: 803
+	waterway: 785
+	tracks: 683
+	created_by: 668
+	source:name: 627
+	passenger: 567
+	```
 
 
 for what kind of features are included in it and whether those cause any problematic outcomes.
+
 ## Problems Encountered in the Map
 After initially downloading a small sample size of the Charlotte area and running it against a provisional data.py file, I noticed five main problems with the data, which I will discuss in the following order:
 
