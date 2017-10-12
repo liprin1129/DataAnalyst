@@ -32,7 +32,7 @@ osm            | 1
 
 #### 1.2. Attributes types
 
-So I checked the type of attribtues consisted of those elements. 
+So I checked the type of attribtues of those elements. 
 
 	```Python
 	< node >
@@ -76,7 +76,7 @@ So I checked the type of attribtues consisted of those elements.
 
 Type of major nodes seems not including critical issue, as all nodes have unique attribute value except attribute **v** in tag element. However, it is not a problematic because tag elements hold various kind of values accordingly different keys. For example,
 
-    ```Python
+    ```XML
     <tag k="name" v="Raeburn Road/Morland Drive" />
     <tag k="source" v="naptan_import" />
     <tag k="highway" v="bus_stop" />
@@ -87,9 +87,11 @@ Type of major nodes seems not including critical issue, as all nodes have unique
     <tag k="naptan:Landmark" v="Bottom of Steps" />
     ```
 
-Above code has 8 different keys, **k**, in a tag's attribute; **name, source, highway, alt_name, naptan:Street, naptan:Bearing, naptan:AtcoCode, naptan:Landmark**, and types of those keys' value are either strings or numbers.
+Above code has 8 different keys, **k**, in a tag element's attribute; **name, source, highway, alt_name, naptan:Street, naptan:Bearing, naptan:AtcoCode, naptan:Landmark**, and types of those keys' value are either strings or numbers.
 
 #### 1.3. Key and value of tag attributes
+
+To know whether the elements are meaningfule, in other words which information is the most dominant, I counted their children based on tag names.
 
 node                        | relation                  | way
 --------------------------- | ------------------------- | ----------------------
@@ -105,6 +107,8 @@ naptan:CommonName: 3742     | route: 169                | addr:street: 3099
 naptan:Bearing: 3729        | operator: 144             | oneway: 2958
 naptan:PlusbusZoneRef: 3660 | ref: 141                  | natural: 2794
 created_by: 2983            | building: 80              | maxspeed: 2784
+...                         | ...                       | ...
+
 
 	```Python
 	<< node >>
@@ -215,6 +219,7 @@ created_by: 2983            | building: 80              | maxspeed: 2784
 	.
 	.
 	```
+
 
 
 for what kind of features are included in it and whether those cause any problematic outcomes.
