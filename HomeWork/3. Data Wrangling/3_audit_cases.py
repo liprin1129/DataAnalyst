@@ -34,7 +34,7 @@ def is_date(string):
 def type_check(key, value, return_dict):
     # Check if number
     if is_number(value):# and attr in ATTRIB_KEY:
-        if value.isdigit():
+        if value.isdigit(gg):
             return_dict[key].add(type(int()))
             #print('{0:5} -- int: {1}'.format('', fieldtypes[field]))
         else:
