@@ -72,24 +72,39 @@ So I checked the type of attribtues consisted of those elements.
 	version : set([<type 'int'>])
 	user : set([<type 'str'>])
 	id : set([<type 'int'>])
-```
+    ```
 
 Type of major nodes seems not including critical issue, as all nodes have unique attribute value except attribute **v** in tag element. However, it is not a problematic because tag elements hold various kind of values accordingly different keys. For example,
 
-```Python
-<tag k="name" v="Raeburn Road/Morland Drive" />
-<tag k="source" v="naptan_import" />
-<tag k="highway" v="bus_stop" />
-<tag k="alt_name" v="Raeburn Road/Morland Drive" />
-<tag k="naptan:Street" v="Raeburn Road" />
-<tag k="naptan:Bearing" v="N" />
-<tag k="naptan:AtcoCode" v="370026690" />
-<tag k="naptan:Landmark" v="Bottom of Steps" />
-```
+    ```Python
+    <tag k="name" v="Raeburn Road/Morland Drive" />
+    <tag k="source" v="naptan_import" />
+    <tag k="highway" v="bus_stop" />
+    <tag k="alt_name" v="Raeburn Road/Morland Drive" />
+    <tag k="naptan:Street" v="Raeburn Road" />
+    <tag k="naptan:Bearing" v="N" />
+    <tag k="naptan:AtcoCode" v="370026690" />
+    <tag k="naptan:Landmark" v="Bottom of Steps" />
+    ```
 
 Above code has 8 different keys, **k**, in a tag's attribute; **name, source, highway, alt_name, naptan:Street, naptan:Bearing, naptan:AtcoCode, naptan:Landmark**, and types of those keys' value are either strings or numbers.
 
 #### 1.3. Key and value of tag attributes
+
+node                        | relation                  | way
+--------------------------- | ------------------------- | ----------------------
+highway: 7767               | type: 2111                | 	building: 112076
+name: 6184                  | name: 1661                | source: 92744
+source: 5742                | source: 1514              | highway: 38054
+naptan:Street: 3800         | site: 1460                | name: 20406
+naptan:AtcoCode: 3793       | naptan:verified: 1448     | landuse: 8769
+naptan:Landmark: 3771       | naptan:StopAreaCode: 1445 | addr:housenumber: 4076
+naptan:verified: 3760       | naptan:StopAreaType: 1443 | barrier: 3709
+naptan:Indicator: 3749      | restriction: 206          | surface: 3569
+naptan:CommonName: 3742     | route: 169                | addr:street: 3099
+naptan:Bearing: 3729        | operator: 144             | oneway: 2958
+naptan:PlusbusZoneRef: 3660 | ref: 141                  | natural: 2794
+created_by: 2983            | building: 80              | maxspeed: 2784
 
 	```Python
 	<< node >>
@@ -119,7 +134,10 @@ Above code has 8 different keys, **k**, in a tag's attribute; **name, source, hi
 	foot: 415
 	traffic_calming: 405
 	natural: 402
-	bicycle: 342
+    bicycle: 342
+	.
+	.
+	.
 	
 	<< relation >>
 	type: 2111
@@ -153,6 +171,9 @@ Above code has 8 different keys, **k**, in a tag's attribute; **name, source, hi
 	except: 11
 	designation: 11
 	addr:housenumber: 10
+	.
+	.
+	.
 	
 	<< way >>
 	building: 112076
@@ -190,6 +211,9 @@ Above code has 8 different keys, **k**, in a tag's attribute; **name, source, hi
 	created_by: 668
 	source:name: 627
 	passenger: 567
+	.
+	.
+	.
 	```
 
 

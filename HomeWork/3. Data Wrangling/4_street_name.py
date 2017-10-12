@@ -1,15 +1,13 @@
 import xml.etree.cElementTree as ET
-import pprint
 from collections import defaultdict
 from tqdm import tqdm
-from datetime import datetime
-from dateutil.parser import parse
 import re
 import sys
 
 #OSM_FILE = "data/Sheffield/3000_sample.osm"
 #OSM_FILE = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
-OSM_FILE = 'data/Sheffield/'+sys.argv[1]
+#OSM_FILE = 'data/Sheffield/'+sys.argv[1]
+OSM_FILE = "Sheffield_data.osm"
 
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road", 
