@@ -34,7 +34,7 @@ osm            | 1
 
 So I checked the type of attribtues of those elements. 
 
-	```Python
+```Python
 	< node >
 	changeset : set([<type 'int'>])
 	uid : set([<type 'int'>])
@@ -72,11 +72,11 @@ So I checked the type of attribtues of those elements.
 	version : set([<type 'int'>])
 	user : set([<type 'str'>])
 	id : set([<type 'int'>])
-    ```
+```
 
 Type of major nodes seems not including critical issue, as all nodes have unique attribute value except attribute **v** in tag element. However, it is not a problematic because tag elements hold various kind of values accordingly different keys. For example,
 
-    ```XML
+```XML
     <tag k="name" v="Raeburn Road/Morland Drive" />
     <tag k="source" v="naptan_import" />
     <tag k="highway" v="bus_stop" />
@@ -85,17 +85,17 @@ Type of major nodes seems not including critical issue, as all nodes have unique
     <tag k="naptan:Bearing" v="N" />
     <tag k="naptan:AtcoCode" v="370026690" />
     <tag k="naptan:Landmark" v="Bottom of Steps" />
-    ```
+```
 
 Above code has 8 different keys, **k**, in a tag element's attribute; **name, source, highway, alt_name, naptan:Street, naptan:Bearing, naptan:AtcoCode, naptan:Landmark**, and types of those keys' value are either strings or numbers.
 
 #### 1.3. Key and value of tag attributes
 
-To know whether the elements are meaningfule, in other words which information is the most dominant, I counted their children based on tag names.
+To know whether the elements are meaningfule, in other words which information is the most dominant, I counted their children based on tag name.
 
 node                        | relation                  | way
 --------------------------- | ------------------------- | ----------------------
-highway: 7767               | type: 2111                | 	building: 112076
+highway: 7767               | type: 2111                | building: 112076
 name: 6184                  | name: 1661                | source: 92744
 source: 5742                | source: 1514              | highway: 38054
 naptan:Street: 3800         | site: 1460                | name: 20406
@@ -109,7 +109,7 @@ naptan:PlusbusZoneRef: 3660 | ref: 141                  | natural: 2794
 created_by: 2983            | building: 80              | maxspeed: 2784
 ...                         | ...                       | ...
 
-
+<!--
 	```Python
 	<< node >>
 	highway: 7767
@@ -219,7 +219,53 @@ created_by: 2983            | building: 80              | maxspeed: 2784
 	.
 	.
 	```
+-->
 
+**node**, **relation**, and **way** elements contains child nodes, but child nodes are not included in **member** and **nd** elements, although those are significantly many. Thus, I only focus the further audit tasks on those three elements.
+
+## Problems Encountered in the Map
+
+#### 1.4. Street name audit
+
+In Sheffield, there are many unique road types which go beyond the given basic road types; *Street, Avenue, Boulevard, Drive, Court, Place, Square, Lane*, and *Road*, for example *Upperthorpe Glen*, and *Fargate*. So after I implemented a code (problematic\_street\_name.py) which tells about unique street names, in other world not be included in the given basic road type list, I searched the unique street names on Google map, and checked in order to determine if they are really unique one or mistyped one.
+
+- Place name and not a street name: 
+	- Edmund Road Business Centre
+	- Riverside Park Industrial Estate 
+	- Sheaf Gardens Industrial Estate (also not in Sheffield)
+	- Upperthorpe -> Upperthorpe road
+	- Mount Pleasant Park -> Mount Pleasant Road
+	- Archer Road Retail Park -> Archer Road
+	- Victoria Villas -> Victoria Road or Victoria Street)
+- Abbrebiation: 
+	- Eccelsall rd
+- Not in Sheffield: 
+	- Waterthorpe Greenway is in Westfield
+	- Sheaf Gardens Industrial Estate in Middlesbrough
+	- Sheffield Digital Campus (no where)
+- duplicated:
+	- Barker's Pool and Barkers Pool
+- Wrong name: 
+	- Utah Terrace -> Utah Road
+	- Westgate -> West Street
+	- 462 -> 462 London road (not sure)
+- Additional Road Type:
+	- Green
+	- North
+	- Gardens
+	- South
+	- View
+	- Parade
+	- Walk
+	- Row
+- Unique Road Name:
+	- Crookes
+	- Backfields
+	- Shalesmoor
+	- Birkendale
+	- The Crofts
+	- Moorfields
+	- Rutland Park
 
 
 for what kind of features are included in it and whether those cause any problematic outcomes.
