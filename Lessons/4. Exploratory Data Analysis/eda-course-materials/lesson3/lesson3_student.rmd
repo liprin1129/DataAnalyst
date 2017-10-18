@@ -23,11 +23,12 @@ pf <- read.csv('pseudo_facebook.tsv', sep = '\t')
 ### Histogram of Users' Birthdays
 ### http://flowingdata.com/2014/02/27/how-to-read-histograms-and-use-them-in-r/
 Notes:
+```{r}
+#install.packages('ggplot2')
+library(ggplot2)
+```
 
 ```{r Histogram of Users\' Birthdays}
-install.packages('ggplot2')
-library(ggplot2)
-
 names(pf)
 
 qplot(x = dob_day, data = pf) +
@@ -241,7 +242,7 @@ qplot(x = tenure, data = pf, binwidth = 30,
       color = I('black'), fill = I('#099DD9'))
 ```
 
-```{r Tenure}
+```{r Tenure1}
 ggplot(aes(x = tenure), data = pf) +
   geom_histogram(binwidth = 30, color = 'black', fill = '#099DD9')
 ```
@@ -256,7 +257,7 @@ qplot(x = tenure/365, data = pf, binwidth = .25,
   scale_x_continuous(breaks = seq(1, 7, 1), limits = c(0, 7))
 ```
 
-```{r Tenure}
+```{r Tenure3}
 ggplot(aes(x = tenure/365), data = pf) +
   geom_histogram(binwidth = .25, color = 'black', fill = '#F79420')
 ```
@@ -267,17 +268,40 @@ ggplot(aes(x = tenure/365), data = pf) +
 Notes:
 
 ```{r Labeling Plots}
-
+qplot(x = tenure/365, data = pf, binwidth = .25,
+  color = I('black'), fill = I('#F79420')) +
+  scale_x_continuous(breaks = seq(1, 7, 1), limits = c(0, 7)) +
+  xlab('Number of years using Facebook') +
+  ylab('Number of users in sample')
 ```
+
+```{r}
+ggplot(aes(x = pf$tenure/365), data = pf) +
+  geom_histogram(binwidth = .25, color = 'black', fill= '#F79420') +
+  scale_x_continuous(breaks = seq(1, 7, 1), limits = c(0, 7)) +
+  xlab('Number of years using Facebook') +
+  ylab('Number of users in sample')
+```
+
 
 ***
 
 ### User Ages
 Notes:
 
-```{r User Ages}
-
+```{r}
+qplot(x = pf$age, data=pf, binwidth = 1, 
+      color = I('black'), fill = I('#5760AB')) + 
+  scale_x_continuous(breaks = seq(0, 113, 5))
 ```
+
+
+```{r User Ages}
+ggplot(aes(x = pf$age), data = pf) +
+  geom_histogram(binwidth = 1, color = 'black', fill= '#5760AB') +
+  scale_x_continuous(breaks = seq(0, 113, 5))
+```
+
 
 #### What do you notice?
 Response:
@@ -296,6 +320,18 @@ Notes:
 
 ### Transforming Data
 Notes:
+```{r}
+p1 <- ggplot(aes(x = friend_count), data = pf) +
+  geom_histogram(color = 'black', fill='#5760AB')
+
+p2 <- qplot(x = log10(pf$friend_count+1), data = pf, color = I('black'), fill = I('#5760AB'))
+p3 <- p1 + scale_x_log10()
+
+p4 <- p1 + scale_x_sqrt()
+
+library(gridExtra)
+grid.arrange(p1, p2, p3, p4, ncol = 2)
+```
 
 ***
 
@@ -303,7 +339,7 @@ Notes:
 Notes:
 
 ```{r Add a Scaling Layer}
-
+# Done in above
 ```
 
 ***
@@ -311,17 +347,54 @@ Notes:
 
 ### Frequency Polygons
 
-```{r Frequency Polygons}
+```{r Frequency Polygons1}
+qplot(x = friend_count, data = subset(pf, !is.na(gender)), binwidth=10, geom = 'freqpoly', color = gender) +
+  scale_x_continuous(limits = c(0, 1000), breaks = seq(0, 1000, 50))
+  #facet_wrap(~gender)
+```
+```{r Frequency Polygons2}
+qplot(x = friend_count, y = ..count../sum(..count..), data = subset(pf, !is.na(gender)), binwidth=10, geom = 'freqpoly', color = gender) +
+  scale_x_continuous(limits = c(0, 1000), breaks = seq(0, 1000, 50)) +
+  xlab('Friend Count') +
+  ylab('Proportion of users with that friend count')
+  #facet_wrap(~gender)
+```
 
+```{r}
+ggplot(aes(x = friend_count, y = ..count../sum(..count..)),
+       data = subset(pf, !is.na(gender))) +
+  geom_freqpoly(aes(color = gender), binwidth=10) +
+  scale_x_continuous(limits = c(0, 1000), breaks = seq(0, 1000, 50)) +
+  xlab('Friend Count') +
+  ylab('Proportion of users with that friend count')
 ```
 
 ***
 
 ### Likes on the Web
 Notes:
+```{r}
+qplot(x = www_likes, data = subset(pf, !is.na(gender)), 
+      geom = 'freqpoly', color = gender) +
+  scale_x_log10()
+```
 
-```{r Likes on the Web}
+```{r Likes on the Web1}
+ggplot(aes(x = www_likes), data = subset(pf, !is.na(gender))) +
+  geom_freqpoly(aes(color = gender)) +
+  scale_x_log10()
+```
+```{r Likes on the Web2}
+ggplot(aes(x = www_likes, y=..density..), data = subset(pf, !is.na(gender))) +
+  #geom_histogram(binwidth = 10, color = 'black', fill = '#5760AB') +
+  geom_freqpoly(aes(color=gender)) +
+  scale_x_log10()
+  #scale_x_continuous(limits = c(0, 100), breaks = seq(0, 1000, 100))
+  #facet_wrap(~gender)
+```
 
+```{r}
+by(pf$www_likes, pf$gender, sum)
 ```
 
 
@@ -331,13 +404,30 @@ Notes:
 Notes:
 
 ```{r Box Plots}
-
+qplot(x = friend_count, data = subset(pf, !is.na(gender)), binwidth = 25) +
+  scale_x_continuous(limits = c(0, 1000), breaks = seq(0, 1000, 50)) +
+  facet_wrap(~gender)
 ```
 
 #### Adjust the code to focus on users who have friend counts between 0 and 1000.
 
 ```{r}
+p1 <- qplot(x = gender, y = friend_count, 
+      data = subset(pf, !is.na(gender)), 
+      geom = 'boxplot',
+      ylim = c(0, 1000))
 
+p2 <- qplot(x = gender, y = friend_count, 
+      data = subset(pf, !is.na(gender)), 
+      geom = 'boxplot') +
+  scale_y_continuous(limits = c(0, 1000))
+
+p3 <- qplot(x = gender, y = friend_count,
+      data = subset(pf, !is.na(gender)),
+      geom = 'boxplot') + 
+  coord_cartesian(ylim = c(0, 1000))
+
+grid.arrange(p1, p2, p3, nrow = 1)
 ```
 
 ***
@@ -346,15 +436,30 @@ Notes:
 Notes:
 
 ```{r Box Plots, Quartiles, and Friendships}
-
+qplot(x = gender, y = friend_count,
+      data = subset(pf, !is.na(gender)),
+      geom = 'boxplot') + 
+  coord_cartesian(ylim = c(0, 250))
 ```
+
+```{r}
+by(pf$friend_count, pf$gender, summary)
+```
+
 
 #### On average, who initiated more friendships in our sample: men or women?
 Response:
 #### Write about some ways that you can verify your answer.
 Response:
 ```{r Friend Requests by Gender}
+qplot(x = gender, y = friendships_initiated, 
+      data = subset(pf, !is.na(gender)),
+      geom = 'boxplot') +
+  coord_cartesian(ylim = c(0, 150))
+```
 
+```{r}
+by(pf$friendships_initiated, pf$gender, summary)
 ```
 
 Response:
@@ -365,11 +470,27 @@ Response:
 Notes:
 
 ```{r Getting Logical}
-
+summary(pf$mobile_likes)
 ```
 
-Response:
+```{r}
+summary(pf$mobile_likes > 0)
+```
 
+```{r}
+pf$mobile_check_in <- NA
+pf$mobile_check_in <- ifelse(pf$mobile_likes > 0, 1, 0)
+pf$mobile_check_in <- factor(pf$mobile_check_in)
+summary(pf$mobile_check_in)
+```
+
+```{r}
+sum(pf$mobile_check_in == 1) / length(pf$mobile_check_in) * 100
+```
+
+
+Response:
+65% of users have mobile experience.
 ***
 
 ### Analyzing One Variable
