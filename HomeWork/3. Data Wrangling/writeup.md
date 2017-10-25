@@ -223,9 +223,9 @@ created_by: 2983            | building: 80              | maxspeed: 2784
 
 **node**, **relation**, and **way** elements contains child nodes, but child nodes are not included in **member** and **nd** elements, although those are significantly many. Thus, I only focus the further audit tasks on those three elements.
 
-## Problems Encountered in the Map
+## 2. Problems Encountered in the Map
 
-#### 1.4. Street name audit
+#### 2.1. Problems in street names
 
 In Sheffield, there are many unique road types which go beyond the given basic road types; *Street, Avenue, Boulevard, Drive, Court, Place, Square, Lane*, and *Road*, for example *Upperthorpe Glen*, and *Fargate*. So after I implemented a code (problematic\_street\_name.py) which tells about unique street names, in other world not be included in the given basic road type list, I searched the unique street names on Google map, and checked in order to determine if they are really unique one or mistyped one.
 
@@ -248,7 +248,7 @@ In Sheffield, there are many unique road types which go beyond the given basic r
 - Wrong name: 
 	- Utah Terrace -> Utah Road
 	- Westgate -> West Street
-	- 462 -> 462 London road (not sure)
+	- 462 -> London road (not sure)
 - Additional Road Type:
 	- Green
 	- North
@@ -267,6 +267,17 @@ In Sheffield, there are many unique road types which go beyond the given basic r
 	- Moorfields
 	- Rutland Park
 
+#### 2.1. Problems in postcodes
+Next, I found inconsistent postal codes of which postal code is not full lenght and building tag is true. Correct postal code starts with an alphbet follwed by numbers and the pattern flips with a space, for example S10 1WE, if the area is occupied by buildings or structures. Some streets only have areal postal code, such as S10, but those are not assumed as incorrect postal codes.
+
+postal code | count                  
+----------- | ----- 
+S12 		| 4
+S10 		| 1
+S17 		| 1
+S12 2 		| 34
+S6 			| 2
+S9 5 		| 1
 
 for what kind of features are included in it and whether those cause any problematic outcomes.
 
