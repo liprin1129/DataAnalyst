@@ -19,4 +19,13 @@ import pickle
 
 enron_data = pickle.load(open("../final_project/final_project_dataset.pkl", "r"))
 
+print 'Q13: No. of dataset:', len(enron_data)
+print 'Q14: No. of features:', len(enron_data['METTS MARK'])
 
+interest_people = 0
+for iter_dict in enron_data.iteritems():
+    if iter_dict[1]['poi'] == True:
+        interest_people += 1
+    #print iter_dict
+
+print 'Q15: No. of people of interest', interest_people
