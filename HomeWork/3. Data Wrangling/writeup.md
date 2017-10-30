@@ -91,7 +91,7 @@ Above code has 8 different keys, **k**, in a tag element's attribute; **name, so
 
 #### 1.3. Key and value of tag attributes
 
-To know whether the elements are meaningfule, in other words which information is the most dominant, I counted their children based on tag names.
+To know whether the elements are meaningfule, in other words what kind of information in elements is the most dominant, I counted their children based on tag names.
 
 node                        | relation                  | way
 --------------------------- | ------------------------- | ----------------------
@@ -109,7 +109,7 @@ naptan:PlusbusZoneRef: 3660 | ref: 141                  | natural: 2794
 created_by: 2983            | building: 80              | maxspeed: 2784
 ...                         | ...                       | ...
 
-
+<!--
 	```Python
 	<< node >>
 	highway: 7767
@@ -219,10 +219,57 @@ created_by: 2983            | building: 80              | maxspeed: 2784
 	.
 	.
 	```
+-->
+Interestingly, there were no additional tag children in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information.
 
+**node**, **relation**, and **way** elements contain children nodes called tag, but they are not included in **member** and **nd** elements. In other words, there are no additional information in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information conceived in sub-nodes, tag. Thus, I only focus the further audit tasks on those three elements.
 
+## 2. Problems Encountered in the Map Dataset
 
-for what kind of features are included in it and whether those cause any problematic outcomes.
+#### 2.1. Problems in street name
+In Sheffield, there are many unique road types which go beyond the given basic types; *Street, Avenue, Boulevard, Drive, Court, Place, Square, Lane*, and *Road*, for example *Upperthorpe Glen*, and *Fargate*. So after I implemented a code (problematic\_street\_name.py) which tells about unique street names, in other world not be included in the given basic road type list, I searched the unique street names on Google map, and checked if they are really unique name or mistyped name.
+
+- Place name and not a street name: 
+	- Edmund Road Business Centre
+	- Riverside Park Industrial Estate 
+	- Sheaf Gardens Industrial Estate (also not in Sheffield)
+	- Upperthorpe -> Upperthorpe road
+	- Mount Pleasant Park -> Mount Pleasant Road
+	- Archer Road Retail Park -> Archer Road
+	- Victoria Villas -> Victoria Road or Victoria Street)
+- Abbrebiation: 
+	- Eccelsall rd
+- Not in Sheffield: 
+	- Waterthorpe Greenway is in Westfield
+	- Sheaf Gardens Industrial Estate in Middlesbrough
+	- Sheffield Digital Campus (no where)
+- duplicated:
+	- Barker's Pool and Barkers Pool
+- Wrong name: 
+	- Utah Terrace -> Utah Road
+	- Westgate -> West Street
+	- 462 -> 462 London road (not sure)
+- Additional Road Type:
+	- Green
+	- North
+	- Gardens
+	- South
+	- View
+	- Parade
+	- Walk
+	- Row
+- Unique Road Name:
+	- Crookes
+	- Backfields
+	- Shalesmoor
+	- Birkendale
+	- The Crofts
+	- Moorfields
+	- Rutland Park
+
+It problematic\_street\_name.py, I added two lists along side the given expected road name list. Road types which are used in Sheffield were added to the first list. Second list have unique road names of the place.
+
+#### 
 
 ## Problems Encountered in the Map
 After initially downloading a small sample size of the Charlotte area and running it against a provisional data.py file, I noticed five main problems with the data, which I will discuss in the following order:

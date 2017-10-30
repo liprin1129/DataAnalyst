@@ -5,3 +5,7 @@ word_data_overfit.pkl
 word_data.pkl
 Lesson3 problem set.Rmd
 DataWranglingWithR.pdf
+
+*.osm
+
+*.bz2
