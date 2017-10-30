@@ -26,7 +26,7 @@ wrong_postcode = {}
 def is_postcode(elem):
     return (elem.attrib['k'] == "addr:postcode")
 
-def audit_wrong_postcode(postcode_list, changeset, postcode, building):
+def audit_wrong_postcode(postcode_list, changeset_id, postcode, building):
     m1 = postcode_re1.search(postcode)
     m2 = postcode_re2.search(postcode)
     m3 = postcode_re3.search(postcode)
@@ -34,7 +34,7 @@ def audit_wrong_postcode(postcode_list, changeset, postcode, building):
 
     if not (m1 or m2 or m3 or m4) and building:
         #print postcode
-        postcode_list[postcode].add(changeset)
+        postcode_list[postcode].add(changeset_id)
     
 def audit_postcode(file_in):
     postcode_name = defaultdict(set)
@@ -56,4 +56,4 @@ def audit_postcode(file_in):
 
 problematic_postcode = audit_postcode(OSM_FILE)
 for postcode, house_name in problematic_postcode.iteritems():
-    print postcode, len(house_name) #house_name
+    print postcode, house_name #house_name

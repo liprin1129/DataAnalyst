@@ -269,42 +269,26 @@ In Sheffield, there are many unique road types which go beyond the given basic t
 
 It problematic\_street\_name.py, I added two lists along side the given expected road name list. Road types which are used in Sheffield were added to the first list. Second list have unique road names of the place.
 
-#### 
+#### 2.2. Problems in postal code
 
-## Problems Encountered in the Map
-After initially downloading a small sample size of the Charlotte area and running it against a provisional data.py file, I noticed five main problems with the data, which I will discuss in the following order:
+All buildings sould have specific postal code. Each group has alphabet and numbers. The UK postal code are consisted of two groups. The first group starts with an alphabet followed by number or numbers. The second one has a reversed order. So, postal codes should have a form like S10 1FG.
 
+In *6\_problematic\_postcode.py*, I auditted **addr:postcode** in sub-nodes named tag, and found 43 postal codes that there are building but do not conform the rule. 
 
-- Over­abbreviated street names *(“S Tryon St Ste 105”)*
-- Inconsistent postal codes *(“NC28226”, “28226­0783”, “28226”)*
-- “Incorrect” postal codes (Charlotte area zip codes all begin with “282” however a large portion of all documented zip codes were outside this region.)
-- Second­ level `“k”` tags with the value `"type"`(which overwrites the element’s previously processed `node[“type”]field`).
-- Street names in second ­level `“k”` tags pulled from Tiger GPS data and divided into segments, in the following format:
+postal code | id
+----------- | ------------ 
+S12 | 105817698, 105817704, 105817710, 112003218
+S10 | 229282360
+S17 | 102871594
+S12 2 | 101781200, 101783948, 101783949, 103789013, 101783953, 101783958, 101781191, 101781193, 101781178, 103788969, 103788976, 103788981, 101781174, 101781154, 101783954, 101781151, 100153189, 100153186, 100153187, 100153184, 100153185, 101781159, 100153183, 101783951, 101783950, 103789002, 103789006, 101781182, 105190682, 101781186, 103788994, 101781166, 101781189, 101781161])
+S6 | 107368123, 107368125
+S9 5 | 106300879
 
-	```XML
-	<tag k="tiger:name_base" v="Stonewall"/> 
-	<tag k="tiger:name_direction_prefix" v="W"/> 
-	<tag k="tiger:name_type" v="St"/>
-	```
+Therefore, the above id containing wrong postal codes are removed from the dataset.
 
-### Over­abbreviated Street Names
-Once the data was imported to SQL, some basic querying revealed street name abbreviations and postal code inconsistencies. To deal with correcting street names, I opted not use regular expressions, and instead iterated over each word in an address, correcting them to their respective mappings in audit.py using the following function:
-
-```python 
-def update(name, mapping): 
-	words = name.split()
-	for w in range(len(words)):
-		if words[w] in mapping:
-			if words[w­1].lower() not in ['suite', 'ste.', 'ste']: 
-				# For example, don't update 'Suite E' to 'Suite East'
-				words[w] = mapping[words[w]] name = " ".join(words)
-	return name
-```
-
-This updated all substrings in problematic address strings, such that:
-*“S Tryon St Ste 105”*
-becomes:
-*“South Tryon Street Suite 105”*
+<!-------------->
+<!-- Template -->
+<!-------------->
 
 ### Postal Codes
 Postal code strings posed a different sort of problem, forcing a decision to strip all leading and trailing characters before and after the main 5­digit zip code. This effectively dropped all leading state characters (as in “NC28226”) and 4­digit zip code extensions following a hyphen (“28226­0783”). This 5­digit restriction allows for more consistent queries.
