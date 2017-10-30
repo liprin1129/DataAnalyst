@@ -91,7 +91,7 @@ Above code has 8 different keys, **k**, in a tag element's attribute; **name, so
 
 #### 1.3. Key and value of tag attributes
 
-To know whether the elements are meaningfule, in other words which information is the most dominant, I counted their children based on tag names.
+To know whether the elements are meaningfule, in other words what kind of information in elements is the most dominant, I counted their children based on tag names.
 
 node                        | relation                  | way
 --------------------------- | ------------------------- | ----------------------
@@ -109,7 +109,7 @@ naptan:PlusbusZoneRef: 3660 | ref: 141                  | natural: 2794
 created_by: 2983            | building: 80              | maxspeed: 2784
 ...                         | ...                       | ...
 
-
+<!--
 	```Python
 	<< node >>
 	highway: 7767
@@ -219,45 +219,76 @@ created_by: 2983            | building: 80              | maxspeed: 2784
 	.
 	.
 	```
+-->
+Interestingly, there were no additional tag children in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information.
 
+**node**, **relation**, and **way** elements contain children nodes called tag, but they are not included in **member** and **nd** elements. In other words, there are no additional information in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information conceived in sub-nodes, tag. Thus, I only focus the further audit tasks on those three elements.
 
+## 2. Problems Encountered in the Map Dataset
 
-for what kind of features are included in it and whether those cause any problematic outcomes.
+#### 2.1. Problems in street name
+In Sheffield, there are many unique road types which go beyond the given basic types; *Street, Avenue, Boulevard, Drive, Court, Place, Square, Lane*, and *Road*, for example *Upperthorpe Glen*, and *Fargate*. So after I implemented a code (problematic\_street\_name.py) which tells about unique street names, in other world not be included in the given basic road type list, I searched the unique street names on Google map, and checked if they are really unique name or mistyped name.
 
-## Problems Encountered in the Map
-After initially downloading a small sample size of the Charlotte area and running it against a provisional data.py file, I noticed five main problems with the data, which I will discuss in the following order:
+- Place name and not a street name: 
+	- Edmund Road Business Centre
+	- Riverside Park Industrial Estate 
+	- Sheaf Gardens Industrial Estate (also not in Sheffield)
+	- Upperthorpe -> Upperthorpe road
+	- Mount Pleasant Park -> Mount Pleasant Road
+	- Archer Road Retail Park -> Archer Road
+	- Victoria Villas -> Victoria Road or Victoria Street)
+- Abbrebiation: 
+	- Eccelsall rd
+- Not in Sheffield: 
+	- Waterthorpe Greenway is in Westfield
+	- Sheaf Gardens Industrial Estate in Middlesbrough
+	- Sheffield Digital Campus (no where)
+- duplicated:
+	- Barker's Pool and Barkers Pool
+- Wrong name: 
+	- Utah Terrace -> Utah Road
+	- Westgate -> West Street
+	- 462 -> 462 London road (not sure)
+- Additional Road Type:
+	- Green
+	- North
+	- Gardens
+	- South
+	- View
+	- Parade
+	- Walk
+	- Row
+- Unique Road Name:
+	- Crookes
+	- Backfields
+	- Shalesmoor
+	- Birkendale
+	- The Crofts
+	- Moorfields
+	- Rutland Park
 
+It problematic\_street\_name.py, I added two lists along side the given expected road name list. Road types which are used in Sheffield were added to the first list. Second list have unique road names of the place.
 
-- Over­abbreviated street names *(“S Tryon St Ste 105”)*
-- Inconsistent postal codes *(“NC28226”, “28226­0783”, “28226”)*
-- “Incorrect” postal codes (Charlotte area zip codes all begin with “282” however a large portion of all documented zip codes were outside this region.)
-- Second­ level `“k”` tags with the value `"type"`(which overwrites the element’s previously processed `node[“type”]field`).
-- Street names in second ­level `“k”` tags pulled from Tiger GPS data and divided into segments, in the following format:
+#### 2.2. Problems in postal code
 
-	```XML
-	<tag k="tiger:name_base" v="Stonewall"/> 
-	<tag k="tiger:name_direction_prefix" v="W"/> 
-	<tag k="tiger:name_type" v="St"/>
-	```
+All buildings sould have specific postal code. Each group has alphabet and numbers. The UK postal code are consisted of two groups. The first group starts with an alphabet followed by number or numbers. The second one has a reversed order. So, postal codes should have a form like S10 1FG.
 
-### Over­abbreviated Street Names
-Once the data was imported to SQL, some basic querying revealed street name abbreviations and postal code inconsistencies. To deal with correcting street names, I opted not use regular expressions, and instead iterated over each word in an address, correcting them to their respective mappings in audit.py using the following function:
+In *6\_problematic\_postcode.py*, I auditted **addr:postcode** in sub-nodes named tag, and found 43 postal codes that there are building but do not conform the rule. 
 
-```python 
-def update(name, mapping): 
-	words = name.split()
-	for w in range(len(words)):
-		if words[w] in mapping:
-			if words[w­1].lower() not in ['suite', 'ste.', 'ste']: 
-				# For example, don't update 'Suite E' to 'Suite East'
-				words[w] = mapping[words[w]] name = " ".join(words)
-	return name
-```
+postal code | id
+----------- | ------------ 
+S12 | 105817698, 105817704, 105817710, 112003218
+S10 | 229282360
+S17 | 102871594
+S12 2 | 101781200, 101783948, 101783949, 103789013, 101783953, 101783958, 101781191, 101781193, 101781178, 103788969, 103788976, 103788981, 101781174, 101781154, 101783954, 101781151, 100153189, 100153186, 100153187, 100153184, 100153185, 101781159, 100153183, 101783951, 101783950, 103789002, 103789006, 101781182, 105190682, 101781186, 103788994, 101781166, 101781189, 101781161])
+S6 | 107368123, 107368125
+S9 5 | 106300879
 
-This updated all substrings in problematic address strings, such that:
-*“S Tryon St Ste 105”*
-becomes:
-*“South Tryon Street Suite 105”*
+Therefore, the above id containing wrong postal codes are removed from the dataset.
+
+<!-------------->
+<!-- Template -->
+<!-------------->
 
 ### Postal Codes
 Postal code strings posed a different sort of problem, forcing a decision to strip all leading and trailing characters before and after the main 5­digit zip code. This effectively dropped all leading state characters (as in “NC28226”) and 4­digit zip code extensions following a hyphen (“28226­0783”). This 5­digit restriction allows for more consistent queries.

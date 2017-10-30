@@ -5,7 +5,8 @@ from tqdm import tqdm
 from datetime import datetime
 from dateutil.parser import parse
 
-OSM_FILE = "data/Sheffield/3000_sample.osm"
+#OSM_FILE = "data/Sheffield/3000_sample.osm"
+OSM_FILE = "sample.osm"
 ATTRIB_KEY = ['changeset', 'uid', 'timestamp', 'lon', 'versioin', 'user', 'lat', 'id']
 
 def is_number(string):
@@ -34,7 +35,7 @@ def is_date(string):
 def type_check(key, value, return_dict):
     # Check if number
     if is_number(value):# and attr in ATTRIB_KEY:
-        if value.isdigit(gg):
+        if value.isdigit():
             return_dict[key].add(type(int()))
             #print('{0:5} -- int: {1}'.format('', fieldtypes[field]))
         else:
