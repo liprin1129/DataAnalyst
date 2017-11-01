@@ -13,7 +13,7 @@ Notes:
 
 ```{r Pseudo-Facebook User Data}
 getwd()
-setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
+#setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
 list.files()
 pf <- read.csv('pseudo_facebook.tsv', sep = '\t')
 ```
