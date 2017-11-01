@@ -3,29 +3,110 @@ Lesson 5
 
 ### Multivariate Data
 Notes:
+```{r}
+getwd()
+setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
+list.files()
 
+library(ggplot2)
+pf <- read.csv('pseudo_facebook.tsv', sep = '\t')
+### You can also read in the data using the following code:
+#pf < - read.delim('pseudo_facebook.tsv')
+```
 ***
 
 ### Moira Perceived Audience Size Colored by Age
 Notes:
+Moira's Investigation from Lesson 3 
+(https://classroom.udacity.com/courses/ud651/lessons/755618712/concepts/8140986010923)
 
+Bernstein, M. S., Bakshy, E., Burke, M., & Karrer, B. (2013). Quantifying the invisible audience in social networks. In Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI 2013), pp. 21-30. 
+(http://hci.stanford.edu/publications/2013/invisibleaudience/invisibleaudience.pdf)
 ***
 
 ### Third Qualitative Variable
 Notes:
 
-```{r Third Qualitative Variable}
-ggplot(aes(x = gender, y = age),
-       data = subset(pf, !is.na(gender))) + geom_histogram()
+Important Notice! Please note that in newer versions of dplyr (0.3.x+), the syntax %.% has been deprecated and replaced with %>%. Videos in the course use %.%, which will produce warning messages. If you answer using the chain operator, you should use %>% instead.
+
+Another warning: Version 0.4.0 of dplyr has a bug when using the median function on the summarize layer, depending on the nature of the data being summarized. You may need to cast the data as a numeric (float) type to get the expected results, e.g. median(as.numeric(var)).
+
+You can include multiple variables to split the data frame when using group_by() function in the dplyr package.
+
+new_groupings <- group_by(data, variable1, variable2)
+
+Repeated use of summarise() and group_by(): (http://stackoverflow.com/questions/21653295/dplyr-issues-with-group-by) The summarize function will automatically remove one level of grouping (the last group it collapsed).
+
+
+```{r}
+library(ggplot2)
+suppressMessages(library(dplyr))
 ```
+
+```{r}
+ggplot(aes(x = gender, y = age),
+       data = subset(pf, !is.na(gender))) + geom_boxplot() +
+  stat_summary(fun.y = mean, geom = 'point', shape = 4)
+```
+
+```{r}
+ggplot(aes(x = age, y = friend_count), 
+       data = subset(pf, !is.na(gender))) +
+  geom_line(aes(color = gender), stat = 'summary', fun.y = median)
+```
+
+```{r Third Qualitative Variable}
+pf.fc_by_age_gender <- pf %>%
+  filter(!is.na(gender)) %>%
+  group_by(age, gender) %>%
+  summarise(mean_friend_count = mean(friend_count),
+            median_friend_count = median(friend_count),
+            n = n()) %>%
+  ungroup() %>%
+  arrange(age)
+```
+Write code to create a new data frame, called 'pf.fc_by_age_gender', that contains
+information on each age AND gender group.
+
+The data frame should contain the following variables:
+
+  mean_friend_count,
+  median_friend_count,
+  n (the number of users in each age and gender grouping)
+
+Here is an example of the structure of your data frame. Your
+data values will be different. Note that if you are grouping by
+more than one variable, you will probably need to call the
+ungroup() function. 
+
+  age gender mean_friend_count median_friend_count    n
+1  13 female          247.2953                 150  207
+2  13   male          184.2342                  61  265
+3  14 female          329.1938                 245  834
+4  14   male          157.1204                  88 1201
 
 ***
 
 ### Plotting Conditional Summaries
 Notes:
+Create a line graph showing the median friend count over the ages
+for each gender. Be sure to use the data frame you just created,
+pf.fc_by_age_gender.
+
+Your code should look similar to the code we used to make the plot the first time. 
+It will not need to make use of the stat and fun.y parameters.
+
+ggplot(aes(x = age, y = friend_count),
+       data = subset(pf, !is.na(gender))) +
+  geom_line(aes(color = gender), stat = 'summary', fun.y = median)
+  
+You could also use color = gender inside the aes() wrapper of ggplot().
+
 
 ```{r Plotting Conditional Summaries}
-
+ggplot(aes(x = age, y = median_friend_count),
+       data = pf.fc_by_age_gender) +
+  geom_line(aes(color = gender))
 ```
 
 ***
@@ -37,8 +118,35 @@ Notes:
 
 ### Wide and Long Format
 Notes:
+You can also restructure the data using the tidyr package. You can review examples and how to use the package in the Data Wrangling with R (https://s3.amazonaws.com/udacity-hosted-downloads/ud651/DataWranglingWithR.pdf) pdf.
 
+The code to change the data frame from long format to wide (or tidy format) is shown below. I encourage you to read the Data Wrangling pdf and write code using the tidyr package before looking at the solution below. 
+
+install.packages("tidyr")
+library(tidyr)
+
+spread(subset(pf.fc_by_age_gender, 
+       select = c('gender', 'age', 'median_friend_count')), 
+       gender, median_friend_count)
+       
+I think you will find the tidyr package easier to use than the reshape2 package. Both packages can get the job done.
+
+An Introduction to reshape2 by Sean Anderson (http://www.seananderson.ca/2013/10/19/reshape.html)
+
+Converting Between Long and Wide Format (http://www.cookbook-r.com/Manipulating_data/Converting_data_between_wide_and_long_format/)
+
+Melt Data Frames (http://www.r-bloggers.com/melt/)
 ***
+```{r}
+#install.packages("tidyr")
+library(tidyr)
+```
+```{r}
+spread(subset(pf.fc_by_age_gender, 
+              select = c('gender', 'age', 'median_friend_count')),
+       gender, median_friend_count)
+```
+
 
 ### Reshaping Data
 Notes:
