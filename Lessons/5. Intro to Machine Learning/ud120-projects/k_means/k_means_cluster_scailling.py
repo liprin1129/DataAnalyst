@@ -53,7 +53,7 @@ features_list = [poi, feature_1, feature_2]
 data = featureFormat(data_dict, features_list )
 poi, finance_features = targetFeatureSplit( data )
 
-
+'''
 ### in the "clustering with 3 features" part of the mini-project,
 ### you'll want to change this line to 
 ### for f1, f2, _ in finance_features:
@@ -61,15 +61,25 @@ poi, finance_features = targetFeatureSplit( data )
 for f1, f2 in finance_features:
     plt.scatter( f1, f2 )
 plt.show()
+'''
+
+### rescale features
+d = numpy.array(finance_features)
+
+from sklearn.preprocessing import MinMaxScaler
+sclr = MinMaxScaler()
+finance_features_rs = sclr.fit_transform(d)
+
+feature_test = numpy.array(numpy.float32([200000, 1000000]))
 
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
 from sklearn.cluster import KMeans
 
 kmeans = KMeans(n_clusters=2)
-kmeans.fit(finance_features)
+#kmeans.fit(feature_test)
 
-pred = kmeans.fit_predict(finance_features)
+pred = kmeans.fit_predict(finance_features_rs)
 
 
 ### rename the "name" parameter when you change the number of features

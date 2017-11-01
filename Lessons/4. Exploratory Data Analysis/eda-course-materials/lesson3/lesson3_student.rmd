@@ -410,7 +410,11 @@ qplot(x = friend_count, data = subset(pf, !is.na(gender)), binwidth = 25) +
 ```
 
 #### Adjust the code to focus on users who have friend counts between 0 and 1000.
+ylim: When we use the ylim parameter, we're actually removing data points from our calculations. So the original box plots that we have might look slightly different. 
 
+scale_y_continuous: Also this value might not be accurate for all of our data. When we use the ylim parameter of the scale_y_continuous layer, we actually remove data points from calculations.
+
+coord_cartesian: Better way. 
 ```{r}
 p1 <- qplot(x = gender, y = friend_count, 
       data = subset(pf, !is.na(gender)), 
