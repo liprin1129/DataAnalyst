@@ -5,7 +5,8 @@ Lesson 5
 Notes:
 ```{r}
 getwd()
-setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
+#setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
+setwd('/media/pure/SharedData/Development/Personal_Dev/DataAnalyst/Lessons/4. Exploratory Data Analysis/eda-course-materials/lesson3/')
 list.files()
 
 library(ggplot2)
@@ -150,10 +151,30 @@ spread(subset(pf.fc_by_age_gender,
 
 ### Reshaping Data
 Notes:
+It’s important to use quotes around the variable name that is assigned tovalue.var. 
 
-```{r}
-install.packages('reshape2')
+We could also create a similar data frame using the dplyr and tidyr packages:
+
+```{r reshape}
+#install.packages('reshape2')
 library(reshape2)
+
+pf.fc_by_age_gender.wide <- dcast(pf.fc_by_age_gender,
+                                  age ~ gender,
+                                  value.var = 'median_friend_count')
+
+head(pf.fc_by_age_gender.wide)
+```
+
+
+```{r Alternative method for reshaping}
+pf.fc_by_age_gender.wide <-
+  subset(pf.fc_by_age_gender[c('age', 'gender', 'median_friend_count')],
+         !is.na(gender)) %>%
+  spread(gender, median_friend_count) %>%
+  mutate(ratio = male / female)
+
+head(pf.fc_by_age_gender.wide)
 ```
 
 
@@ -163,16 +184,31 @@ library(reshape2)
 Notes:
 
 ```{r Ratio Plot}
-
+ggplot(aes(x = age, y = male/female), data = pf.fc_by_age_gender.wide) +
+  geom_line() +
+  geom_hline(yintercept = 1, linetype = 'dashed', color = 'blue')
 ```
 
 ***
 
 ### Third Quantitative Variable
 Notes:
+Create a variable called year_joined in the pf data frame using the variable tenure and 2014 as the reference year.
+
+The variable year_joined should contain the year that a user joined facebook.
+
+See the Instructor Notes for three hints if you get stuck. Scroll down slowly to see one hint at a time if you would like some guidance.
+
+A common mistake is to use tenure rather than pf$tenure or with(pf, tenure...). Remember that you need to access the variable in the data frame. This is not one of the hints! :) 
+
+Hint 1: Divide the tenure variable by a number. Tenure is measured in days, but we want to convert it to years. 
+
+Hint 2: Subtract tenure measured in years from 2014. What does the decimal portion represent? Should we round up or round down to the closest year? 
+
+Hint 3: You can use the floor() function to round down to the nearest integer. You can use the ceiling() function to round up to the nearest integer. Which one should you use?
 
 ```{r Third Quantitative Variable}
-
+pf$year_joined <- floor(2014 - pf$tenure/365)
 ```
 
 ***
@@ -180,14 +216,45 @@ Notes:
 ### Cut a Variable
 Notes:
 
-```{r Cut a Variable}
+Create a new variable in the data frame called year_joined.bucket by using the cut function on the variable year_joined.
 
+You need to create the following buckets for the new variable, year_joined.bucket
+
+      (2004, 2009]
+      (2009, 2011]
+      (2011, 2012]
+      (2012, 2014]
+
+Note that a parenthesis means exclude the year and a bracket means include the year.
+
+Look up the documentation for cut or try the link in the Instructor Notes to accomplish this task.
+
+The Cut Function (http://www.r-bloggers.com/r-function-of-the-day-cut-2/)
+
+Be sure to close your parentheses!
+
+A common mistake is to use year_joined rather than pf$year_joined or with(pf, year_joined...). Remember that you need to access the variable in the data frame.
+
+```{r}
+summary(pf$year_joined)
+```
+```{r}
+table(pf$year_joined)
+```
+
+
+```{r Cut a Variable}
+pf$year_joined.bucket <- cut(pf$year_joined, breaks = c(2004, 2009, 2011, 2012, 2014))
 ```
 
 ***
 
 ### Plotting it All Together
 Notes:
+
+```{r}
+table(pf$year_joined.bucket, useNA = 'ifany')
+```
 
 ```{r Plotting it All Together}
 
