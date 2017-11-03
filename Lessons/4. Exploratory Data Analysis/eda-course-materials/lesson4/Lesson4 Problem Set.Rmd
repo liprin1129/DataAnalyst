@@ -136,6 +136,7 @@ where n is the number of diamonds in each
 level of clarity.
 
 ```{r}
+library('dplyr')
 clarity_group <- group_by(diamonds, clarity)
 diamondsByClarity <- summarise(clarity_group,
                                         mean_price = mean(price),
@@ -146,8 +147,6 @@ diamondsByClarity <- summarise(clarity_group,
 diamondsByClarity <- arrange(diamondsByClarity, clarity)
 ```
 ```{r Alterative code using dplyr}
-library('dplyr')
-
 diamondsByClarity <- 
   diamonds %>%
   group_by(clarity) %>%
