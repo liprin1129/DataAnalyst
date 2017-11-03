@@ -64,14 +64,16 @@ plt.show()
 '''
 
 ### rescale features
+d = numpy.array(finance_features)
 
 from sklearn.preprocessing import MinMaxScaler
 sclr = MinMaxScaler()
 finance_features_rs = sclr.fit_transform(finance_features)
 
-feature_test = numpy.array(numpy.float32([200000, 1000000]))
-print sclr.fit_transform(feature_test)
+feature_test = numpy.array([[200000., 1000000.]])
+print sclr.transform(feature_test)
 
+'''
 ### cluster here; create predictions of the cluster labels
 ### for the data and store them to a list called pred
 from sklearn.cluster import KMeans
@@ -88,3 +90,5 @@ try:
     Draw(pred, finance_features, poi, mark_poi=False, name="clusters.pdf", f1_name=feature_1, f2_name=feature_2)
 except NameError:
     print "no predictions object named pred found, no clusters to plot"
+
+'''
