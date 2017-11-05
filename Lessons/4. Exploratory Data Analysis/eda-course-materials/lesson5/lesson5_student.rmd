@@ -457,7 +457,7 @@ The transform function takes in a data frame and allows us to add different vari
 yo <- transform(yo, all.purchases = strawberry + blueberry + pina.colada + plain + mixed.berry)
 ```
 
-#```{r Alternative vervose code}
+```{r Alternative vervose code}
 #yo$all.purchases <- yo$strawberry + yo$blueberry + yo$pina.colada + yo$plain + yo$mixed.berry
 ```
 
@@ -465,11 +465,17 @@ yo <- transform(yo, all.purchases = strawberry + blueberry + pina.colada + plain
 
 ### Prices over Time
 Notes:
+# Create a scatterplot of price vs time.
+
+# This will be an example of a time series plot.
+
+# Resolve overplotting issues by using
+# techniques you learned in Lesson 4.
 
 ```{r Prices over Time}
-
+ggplot(aes(x = time, y = price), data = yo) +
+  geom_jitter(alpha = 1/4, shape = 21, fill = I('#F79420'))
 ```
-
 ***
 
 ### Sampling Observations
@@ -479,8 +485,30 @@ Notes:
 
 ### Looking at Samples of Households
 
-```{r Looking at Sample of Households}
+Note: x %in% y returns a logical (boolean) vector the same length as x that says whether each entry in x appears in y. That is, for each entry in x, it checks to see whether it is in y. This allows us to subset the data so we get all the purchases occasions for the households in the sample. Then, we create scatterplots of price vs. time and facet by the sample id. 
 
+
+Use the pch or shape parameter to specify the symbol when plotting points. Scroll down to 'Plotting Points' on QuickR's Graphical Parameters.
+
+```{r Looking at Sample of Households}
+set.seed(4230)
+sample.ids <- sample(levels(yo$id), 16)
+
+ggplot(aes(x = time, y = price),
+       data = subset(yo, id %in% sample.ids)) +
+  facet_wrap( ~ id) +
+  geom_line() +
+  geom_point(aes(size = all.purchases), pch = 1)
+```
+```{r}
+set.seed(10)
+sample.ids <- sample(levels(yo$id), 16)
+
+ggplot(aes(x = time, y = price),
+       data = subset(yo, id %in% sample.ids)) +
+  facet_wrap( ~ id) +
+  geom_line() +
+  geom_point(aes(size = all.purchases), pch = 1)
 ```
 
 ***
@@ -497,8 +525,33 @@ Notes:
 
 ### Scatterplot Matrix
 Notes:
+Here's the scatterplot matrix as a pdf (https://s3.amazonaws.com/udacity-hosted-downloads/ud651/scatterplotMatrix.pdf).
 
+You'll need to run the code install.packages('GGally') to install the package for creating this particular scatterplot matrix.
+
+If the plot takes a long time to render or if you want to see some of the scatterplot matrix, then only examine a smaller number of variables. You can use the following code or select fewer variables. We recommend including gender (the 6th variable)!
+
+pf_subset = pf[, c('age', 'dob_year', 'dob_month', 'gender', 'tenure')]
+
+You can also select a subset using the subset() function and the "select" argument:
+
+pf_subset <- subset(pf, select = -c(userid, year_joined, year_joined_bucket))
+
+The - sign in the "select" value indicates all but the listed columns.
+
+You may find in your matrix that variable labels are on the outer edges of the scatterplot matrix, rather than on the diagonal. If you want labels in the diagonal, you can set the axisLabels = 'internal' argument in your ggpairs command.
 ***
+```{r}
+#install.packages('GGally')
+library(GGally)
+theme_set(theme_minimal(20))
+
+# set the seed for reproducible results
+set.seed(1836)
+pf_subset <- pf[, c(2:15)]
+names(pf_subset)
+#ggpairs(pf_subset[sample.int(nrow(pf_subset), 1000), ], axisLabels = 'internal')
+```
 
 ### Even More Variables
 Notes:
@@ -507,6 +560,9 @@ Notes:
 
 ### Heat Maps
 Notes:
+Melt data frames in R (http://www.r-bloggers.com/melt/)
+
+Micro-array/Gene Expression Data (https://s3.amazonaws.com/udacity-hosted-downloads/ud651/nci.tsv)
 
 ```{r}
 nci <- read.table("nci.tsv")

@@ -20,7 +20,7 @@ def parseOutText(f):
     f.seek(0)  ### go back to beginning of file (annoying)
     all_text = f.read()
 
-    ### split off metadata
+    ### Split off metadata
     content = all_text.split("X-FileName:")
     words = ""
     if len(content) > 1:
@@ -33,10 +33,17 @@ def parseOutText(f):
         ### split the text string into individual words, stem each word,
         ### and append the stemmed word to words (make sure there's a single
         ### space between each stemmed word)
+        from nltk.stem import SnowballStemmer
+
+        stemmer = SnowballStemmer("english")
+
+        #words = text_string.split(" ")
+        import nltk
         
-
-
-
+        nltk.data.path.append("/Users/pure/Private_Local_Data/Development/.NLTK_Data/")
+        words = nltk.word_tokenize(text_string)
+        singles = [stemmer.stem(word) for word in words]
+        words = " ".join(singles)
 
     return words
 
