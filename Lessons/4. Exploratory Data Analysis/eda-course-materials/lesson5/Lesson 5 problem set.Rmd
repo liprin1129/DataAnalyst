@@ -1,0 +1,97 @@
+---
+title: "R Notebook"
+output:
+  html_notebook: default
+  html_document: default
+---
+
+```{r}
+library(ggplot2) #must load the ggplot package first
+library(dplyr)
+data(diamonds) #loads the diamonds data set since it comes with the ggplot package
+```
+
+# 1. Quiz: Price Histograms with Facet and Color
+
+Create a histogram of diamond prices. Facet the histogram by diamond color and use cut to color the histogram bars.
+
+The plot should look something like this. http://i.imgur.com/b5xyrOu.jpg
+
+Note: In the link, a color palette of type 'qual' was used to color the histogram using scale_fill_brewer(type = 'qual')
+
+```{r}
+ggplot(aes(x = price), data = diamonds) +
+  geom_histogram(aes(fill = cut)) +
+  scale_x_log10() +
+  facet_wrap(~color) +
+  #scale_fill_brewer(type = 'qual')
+  scale_fill_brewer(palette="Spectral")
+```
+
+# 2. Quize: Price vs. Table Colored by Cut
+
+Create a scatterplot of diamond price vs. table and color the points by the cut of the diamond.
+
+The plot should look something like this. http://i.imgur.com/rQF9jQr.jpg
+
+Note: In the link, a color palette of type 'qual' was used to color the scatterplot using scale_color_brewer(type = 'qual')
+
+```{r}
+ggplot(aes(x = table, y = price), data = diamonds) +
+  geom_point(aes(colour = cut)) +
+  #scale_fill_brewer(palette="Spectral")
+  scale_color_brewer(type = 'qual')
+```
+
+# 3. Quiz: Typical Table Value
+
+What is the typical table range for the majority of diamonds of ideal cut?
+
+```{r}
+subset(diamonds, cut == 'Ideal')$table %>%
+  summary()
+```
+
+What is the typical table range for the majority of diamonds of premium cut?
+
+```{r}
+subset(diamonds, cut == 'Premium')$table %>%
+  summary()
+```
+
+# 4. Quiz: Price vs. Volume and Diamond Clarity
+
+Create a scatterplot of diamond price vs. volume (x \* y \* z) and color the points by the clarity of diamonds. Use scale on the y-axis to take the log10 of price. You should also omit the top 1% of diamond volumes from the plot.
+
+Note: Volume is a very rough approximation of a diamond's actual volume.
+
+The plot should look something like this. http://i.imgur.com/excUpea.jpg
+
+Note: In the link, a color palette of type 'div' was used to color the scatterplot using scale_color_brewer(type = 'div')
+
+```{r}
+diamonds$volumne <- with(diamonds, x*y*z)
+ggplot(aes(x = volumne, y = price), data = subset(diamonds, volumne < quantile(volumne, probs = .99))) +
+  geom_point(aes(colour = clarity)) +
+  scale_y_log10() +
+  scale_color_brewer(type = 'div')
+```
+
+# 5. Quiz: Proportion of Friendships Initiated
+
+Many interesting variables are derived from two or more others. For example, we might wonder how much of a person's network on a service like Facebook the user actively initiated. Two users with the same degree (or number of friends) might be very different if one initiated most of those connections on the service, while the other initiated very few. So it could be useful to consider this proportion of existing friendships that the user initiated. This might be a good predictor of how active a user is compared with their peers, or other traits, such as personality (i.e., is this person an extrovert?).
+
+Your task is to create a new variable called 'prop_initiated' in the Pseudo-Facebook data set. The variable should contain the proportion of friendships that the user initiated.
+
+```{r}
+getwd()
+setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
+
+list.files()
+pf <- read.csv('pseudo_facebook.tsv', sep = '\t')
+```
+
+```{r}
+getwd()
+```
+
