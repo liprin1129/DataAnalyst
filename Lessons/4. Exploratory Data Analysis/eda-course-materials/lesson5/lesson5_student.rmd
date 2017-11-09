@@ -5,8 +5,8 @@ Lesson 5
 Notes:
 ```{r}
 getwd()
-setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
-#setwd('/media/pure/SharedData/Development/Personal_Dev/DataAnalyst/Lessons/4. Exploratory Data Analysis/eda-course-materials/lesson3/')
+#setwd('/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/Lessons/4.\ Exploratory\ Data\ Analysis/eda-course-materials/lesson3/')
+setwd('/media/pure/SharedData/Development/Personal_Dev/DataAnalyst/Lessons/4. Exploratory Data Analysis/eda-course-materials/lesson3/')
 list.files()
 
 library(ggplot2)
