@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 Lesson 6
 ========================================================
 
@@ -60,22 +65,33 @@ Notes:
 
 ### The Rise of Diamonds
 Notes:
+The Counte of Monte Cristo (https://www.youtube.com/watch?v=PJyRNeCErNE) and Knocked Up (https://www.youtube.com/watch?v=Be3sZKmfb9g) are two movies that have proposals without engagement rings.
 
+These are the only two movies that came to mind...after A LOT of time. Can you think of any others? If so, share it in the discussions!
 ***
 
 ### ggpairs Function
 Notes:
+You can click on the packages tab in RStudio to determine which packages have been installed.
+
+You may receive a message when installing the new packages. If so, click cancel, clear your workspace, and try installing the packages again.
+
+In this video, Solomon works with the plyr package. We worked with the dplyr package to manipulate data frames and to create new ones throughout the course. dplyr is the latest version of plyr that is specifically for working with data frames.
+
+Similarly, we worked with the reshape2 package, which is the newest version of the reshape package.
+
+ggpairs output (https://s3.amazonaws.com/udacity-hosted-downloads/ud651/ggpairs_landscape.pdf) When you duplicate the plot matrix on your local machine, you may want to add a axisLabels = 'internal' argument to your ggpairs function call to have the variable names on the diagonal of the matrix rather than on the outside.
 
 ```{r ggpairs Function}
 # install these if necessary
-install.packages('GGally')
-install.packages('scales')
-install.packages('memisc')
-install.packages('lattice')
-install.packages('MASS')
-install.packages('car')
-install.packages('reshape')
-install.packages('plyr')
+install.packages('GGally') # for multiple particular plot
+install.packages('scales') # for a variey of things
+install.packages('memisc') # to summarize regression
+install.packages('lattice') # 
+install.packages('MASS') # for various functions  
+install.packages('car') # to recode variables
+install.packages('reshape2') # 
+install.packages('plyr') # to create interesting summaries and transmissions
 
 # load the ggplot graphics package and the others
 library(ggplot2)
@@ -86,7 +102,10 @@ library(memisc)
 # sample 10,000 diamonds from the data set
 set.seed(20022012)
 diamond_samp <- diamonds[sample(1:length(diamonds$price), 10000), ]
-ggpairs(diamond_samp, params = c(shape = I('.'), outlier.shape = I('.')))
+
+ggpairs(diamond_samp, #axisLabels = 'internal',
+  lower = list(continuous = wrap("points", shape = I('.'))),
+  upper = list(combo = wrap("box", outlier.shape = I('.'))))
 ```
 
 What are some things you notice in the ggpairs output?
@@ -96,22 +115,50 @@ Response:
 
 ### The Demand of Diamonds
 Notes:
+Create two histograms of the price variable and place them side by side on one output image.
+
+We’ve put some code below to get you started.
+
+The first plot should be a histogram of price and the second plot should transform the price variable using log10.
+
+Set appropriate bin widths for each plot. ggtitle() will add a title to each histogram.
+
+You can self-assess your work with the plots in the solution video.
 
 ```{r The Demand of Diamonds}
+library(gridExtra)
 
+plot1 <- ggplot(aes(x = price), data = diamonds) + 
+  geom_histogram(binwidth = 100, fill = I('#099DD9')) +
+  ggtitle('Price')
+
+plot2 <- ggplot(aes(x = price), data = diamonds) +
+  geom_histogram(binwidth = 0.01, fill = I('#F79420')) +
+  scale_x_log10() +
+  ggtitle('Price (log10)')
+
+grid.arrange(plot1, plot2, ncol=2)
 ```
 
 ***
 
 ### Connecting Demand and Price Distributions
 Notes:
+When looking at these plots, what do you notice? Think specifically about the two peaks in the transformed plot and how it relates to the demand for diamonds.
 
+Answer: 
+There are two peaks in log scale plot, while in the normal plot I cannot distingush shuch peask. 
 ***
 
 ### Scatterplot Transformation
 
-```{r Scatterplot Transformation}
+Basic Structure of a Function (https://www.youtube.com/watch?v=Z1wB1rHAYzQ&list=PLOU2XLYxmsIK9qQfztXeybpHvru-TrqAP)
 
+```{r Scatterplot Transformation}
+ggplot(aes(x = carat, y = price), data = diamonds) +
+  geom_point() +
+  scale_y_continuous(trans = log10_trans()) +
+  ggtitle('Price (log10) by Carat')
 ```
 
 
@@ -125,7 +172,7 @@ cuberoot_trans = function() trans_new('cuberoot', transform = function(x) x^(1/3
 #### Use the cuberoot_trans function
 ```{r Use cuberoot_trans}
 ggplot(aes(carat, price), data = diamonds) + 
-  geom_point() + 
+  geom_point(alpha = 1/2, size = 0.75, position = 'jitter') + 
   scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3),
                      breaks = c(0.2, 0.5, 1, 2, 3)) + 
   scale_y_continuous(trans = log10_trans(), limits = c(350, 15000),
@@ -138,7 +185,8 @@ ggplot(aes(carat, price), data = diamonds) +
 ### Overplotting Revisited
 
 ```{r Sort and Head Tables}
-
+head(sort(table(diamonds$carat), decreasing = T))
+head(sort(table(diamonds$price), decreasing = T))
 ```
 
 
@@ -156,18 +204,36 @@ ggplot(aes(carat, price), data = diamonds) +
 
 ### Other Qualitative Factors
 Notes:
+What makes a diamond sparkle? (http://www.bluenile.com/diamonds/diamond-cut)
+
+Does clarity affect the sparkle? (http://www.bluenile.com/diamonds/diamond-clarity)
+
+What's a jeweler's loupe? (http://en.wikipedia.org/wiki/Loupe)
 
 ***
 
 ### Price vs. Carat and Clarity
+Adjust the code below to color the points by clarity.
 
-Alter the code below.
-```{r Price vs. Carat and Clarity}
+A layer called scale_color_brewer() has been added to adjust the legend and provide custom colors.
+
+See if you can figure out what it does. Links to resources are in the Instructor Notes.
+
+You will need to install the package RColorBrewer in R to get the same colors and color palettes.
+```{r}
 # install and load the RColorBrewer package
-install.packages('RColorBrewer')
+#install.packages('RColorBrewer', dependencies = TRUE)
 library(RColorBrewer)
+```
 
-ggplot(aes(x = carat, y = price), data = diamonds) + 
+ggplot2: scale_colour_brewer
+ggplot2: Color Brewer Palettes and Safe Colors/#palettes-color-brewer)
+ggplot2: Legends/)
+
+override.aes() change legend symols to be larger or more be transparent than the plot's ones. 
+
+```{r Price vs. Carat and Clarity}
+ggplot(aes(x = carat, y = price, colour = clarity), data = diamonds) + 
   geom_point(alpha = 0.5, size = 1, position = 'jitter') +
   scale_color_brewer(type = 'div',
     guide = guide_legend(title = 'Clarity', reverse = T,
@@ -190,7 +256,7 @@ Response:
 
 Alter the code below.
 ```{r Price vs. Carat and Cut}
-ggplot(aes(x = carat, y = price, color = clarity), data = diamonds) + 
+ggplot(aes(x = carat, y = price, color = cut), data = diamonds) + 
   geom_point(alpha = 0.5, size = 1, position = 'jitter') +
   scale_color_brewer(type = 'div',
                      guide = guide_legend(title = 'Clarity', reverse = T,
@@ -199,7 +265,7 @@ ggplot(aes(x = carat, y = price, color = clarity), data = diamonds) +
                      breaks = c(0.2, 0.5, 1, 2, 3)) + 
   scale_y_continuous(trans = log10_trans(), limits = c(350, 15000),
                      breaks = c(350, 1000, 5000, 10000, 15000)) +
-  ggtitle('Price (log10) by Cube-Root of Carat and Clarity')
+  ggtitle('Price (log10) by Cube-Root of Carat and cut')
 ```
 
 ***
@@ -213,16 +279,16 @@ Response:
 
 Alter the code below.
 ```{r Price vs. Carat and Color}
-ggplot(aes(x = carat, y = price, color = cut), data = diamonds) + 
+ggplot(aes(x = carat, y = price, color = color), data = diamonds) + 
   geom_point(alpha = 0.5, size = 1, position = 'jitter') +
   scale_color_brewer(type = 'div',
-                     guide = guide_legend(title = Cut, reverse = T,
+                     guide = guide_legend(title = 'Color', reverse = FALSE,
                                           override.aes = list(alpha = 1, size = 2))) +  
   scale_x_continuous(trans = cuberoot_trans(), limits = c(0.2, 3),
                      breaks = c(0.2, 0.5, 1, 2, 3)) + 
   scale_y_continuous(trans = log10_trans(), limits = c(350, 15000),
                      breaks = c(350, 1000, 5000, 10000, 15000)) +
-  ggtitle('Price (log10) by Cube-Root of Carat and Cut')
+  ggtitle('Price (log10) by Cube-Root of Carat and Color')
 ```
 
 ***
