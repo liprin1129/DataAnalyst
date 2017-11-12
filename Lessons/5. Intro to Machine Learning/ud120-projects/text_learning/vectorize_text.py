@@ -58,6 +58,12 @@ for name, from_person in [("sara", from_sara), ("chris", from_chris)]:
             ### append the text to word_data
             for instance in removal_instances:
                 text_from_email = text_from_email.replace(instance, "")
+
+            ## For feature selection
+            text_from_email = text_from_email.replace("sshacklensf", "")
+            text_from_email = text_from_email.replace("cgermannsf", "")
+            ## End of feature selection
+            
             word_data.append(text_from_email)
 
             ### append a 0 to from_data if email is from Sara, and 1 if email is from Chris
@@ -74,8 +80,8 @@ print "emails processed"
 from_sara.close()
 from_chris.close()
 
-pickle.dump( word_data, open("your_word_data.pkl", "w") )
-pickle.dump( from_data, open("your_email_authors.pkl", "w") )
+pickle.dump( word_data, open("your_word_data_part2.pkl", "w") )
+pickle.dump( from_data, open("your_email_authors_part2.pkl", "w") )
 
 
 

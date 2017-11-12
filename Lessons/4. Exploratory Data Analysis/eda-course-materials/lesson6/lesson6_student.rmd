@@ -22,18 +22,19 @@ Limit the x-axis and y-axis to omit the top 1% of values.
 
 Hint: Use the quantile() function inside of xlim and ylim to omit the top 1% of values for each variable.
 ```{r Scatterplot Review}
+library(ggplot2)
 ggplot(aes(x = carat, y = price), data = subset(diamonds, price < quantile(price, probs = .99) & carat < quantile(carat, probs = .99))) +
   geom_point(fill = I('#F79420'), color = I('black'), shape = 21)
 ```
 
-```{r Alternative code}
+```{r Alternative code 1}
 qplot(data = diamonds, x = carat, y = price,
       xlim = c(0, quantile(diamonds$carat, 0.99)),
       ylim = c(0, quantile(diamonds$price, 0.99))) +
   geom_point(fill = I('#F79420'), color = I('black'), shape = 21)
 ```
 
-```{r Alternative code}
+```{r Alternative code 2}
 ggplot(aes(x = carat, y = price), data = diamonds) +
   scale_x_continuous(lim = c(0, quantile(diamonds$carat, 0.99))) +
   scale_y_continuous(lim = c(0, quantile(diamonds$price, 0.99))) +
@@ -84,14 +85,14 @@ ggpairs output (https://s3.amazonaws.com/udacity-hosted-downloads/ud651/ggpairs_
 
 ```{r ggpairs Function}
 # install these if necessary
-install.packages('GGally') # for multiple particular plot
-install.packages('scales') # for a variey of things
-install.packages('memisc') # to summarize regression
-install.packages('lattice') # 
-install.packages('MASS') # for various functions  
-install.packages('car') # to recode variables
-install.packages('reshape2') # 
-install.packages('plyr') # to create interesting summaries and transmissions
+#install.packages('GGally') # for multiple particular plot
+#install.packages('scales') # for a variey of things
+#install.packages('memisc') # to summarize regression
+#install.packages('lattice') # 
+#install.packages('MASS') # for various functions  
+#install.packages('car') # to recode variables
+#install.packages('reshape2') # 
+#install.packages('plyr') # to create interesting summaries and transmissions
 
 # load the ggplot graphics package and the others
 library(ggplot2)
@@ -307,6 +308,7 @@ Response:
 
 ### Building the Linear Model
 Notes:
+Linear Models and Operators in R (http://data.princeton.edu/R/linearModels.html)
 
 ```{r Building the Linear Model}
 m1 <- lm(I(log(price)) ~ I(carat^(1/3)), data = diamonds)
@@ -314,16 +316,37 @@ m2 <- update(m1, ~ . + carat)
 m3 <- update(m2, ~ . + cut)
 m4 <- update(m3, ~ . + color)
 m5 <- update(m4, ~ . + clarity)
-mtable(m1, m2, m3, m4, m5)
+#mtable(m1, m2, m3, m4, m5)
+mtable(m1, m2, m3, m4, m5, sdigits = 3)
 ```
 
-Notice how adding cut to our model does not help explain much of the variance
-in the price of diamonds. This fits with out exploration earlier.
+Notice how adding cut to our model does not help explain much of the variance in the price of diamonds. This fits with out exploration earlier.
 
 ***
 
 ### Model Problems
 Video Notes:
+
+Let’s put our model in a larger context. Assuming that the data is not somehow corrupted and we are not egregiously violating some of the key assumptions of linear regression (for example, violating the IID assumption by having a bunch of duplicated observations in our data set), what could be some problems with this model? What else should we think about when using this model?
+
+Take your time to answer this question, do some qualitative research about the diamond market. See the links below to get started.
+
+Diamond Prices over the Years (http://www.pricescope.com/diamond-prices/diamond-prices-chart)
+
+Global Diamond Report (http://www.bain.com/publications/articles/global-diamond-report-2013.aspx)
+
+Falling Supply and Rising Demand: Couples in Shanghai take to the Ring (http://diamonds.blogs.com/diamonds_update/diamond-prices/) 
+
+
+If you'd like to learn more about linear models and how to interpret regression coefficients, please refer to the following articles.
+
+Interpreting Regression Coefficients in R on R Bloggers (http://www.r-bloggers.com/interpreting-regression-coefficient-in-r/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+RBloggers+%28R+bloggers%29)
+
+Interpreting Regression Coefficients on the Analysis Factor blog (http://www.theanalysisfactor.com/interpreting-regression-coefficients/)
+
+Fitting and Interpreting Linear Models by ŷhat (http://blog.yhat.com/posts/r-lm-summary.html)
+
+Another Explanation of Factor Coefficients in Linear Models on Stats StackExchange http://stats.stackexchange.com/a/24256)
 
 Research:
 (Take some time to come up with 2-4 problems for the model)
@@ -335,15 +358,36 @@ Response:
 
 ### A Bigger, Better Data Set
 Notes:
+Your task is to build five linear models like Solomon did for the diamonds data set only this time you'll use a sample of diamonds from the diamonds big data set.
+
+Be sure to make use of the same variables (logprice, carat, etc.) and model names (m1, m2, m3, m4, m5).
+
+To get the diamonds big data into RStudio on your machine, copy, paste, and run the code in the Instructor Notes. There's 598,024 diamonds in this data set!
+
+Since the data set is so large, you are going to use a sample of the data set to compute the models. You can use the entire data set on your machine which will produce slightly different coefficients and statistics for the models.
+
+Your task is to write the code to create the models.
 
 ```{r A Bigger, Better Data Set}
-install.package('bitops')
-install.packages('RCurl')
-library('bitops')
-library('RCurl')
+#install.packages('bitops')
+#install.packages('RCurl')
+#library('bitops')
+#library('RCurl')
 
-diamondsurl = getBinaryURL("https://raw.github.com/solomonm/diamonds-data/master/BigDiamonds.Rda")
-load(rawConnection(diamondsurl))
+#diamondsurl = getBinaryURL("https://raw.github.com/solomonm/diamonds-data/master/BigDiamonds.Rda")
+#load(rawConnection(diamondsurl))
+
+load("BigDiamonds.rda")
+diamondsbig$logprice <- log(diamondsbig$price)
+m1 <- lm(logprice ~I(carat^(1/3)),
+         data = diamondsbig[diamondsbig$price < 10000 &
+                              diamondsbig$cert == "GIA",])
+#m1 <- lm(I(log(price)) ~ I(carat^(1/3)), data = diamondsbig)
+m2 <- update(m1, ~ . + carat)
+m3 <- update(m2, ~ . + cut)
+m4 <- update(m3, ~ . + color)
+m5 <- update(m4, ~ . + clarity)
+mtable(m1, m2, m3, m4, m5)
 ```
 
 The code used to obtain the data is available here:
@@ -370,7 +414,27 @@ thisDiamond = data.frame(carat = 1.00, cut = "V.Good",
                          color = "I", clarity="VS1")
 modelEstimate = predict(m5, newdata = thisDiamond,
                         interval="prediction", level = .95)
+
+exp(modelEstimate)
 ```
+
+The prediction interval here may be slightly conservative, as the model errors are heteroskedastic over carat (and hence price) even after our log and cube-root transformations.
+
+See the output of the following code.
+
+```{r}
+dat = data.frame(m4$model, m4$residuals)
+
+with(dat, sd(m4.residuals))
+
+with(subset(dat, carat > .9 & carat < 1.1), sd(m4.residuals))
+
+dat$resid <- as.numeric(dat$m4.residuals)
+ggplot(aes(y = resid, x = round(carat, 2)), data = dat) +
+  geom_line(stat = "summary", fun.y = sd)
+```
+
+How could we do better? If we care most about diamonds with carat weights between 0.50 and 1.50, we might restrict the data we use to fit our model to diamonds that are that size - we have enough data.
 
 Evaluate how well the model predicts the BlueNile diamond's price. Think about the fitted point estimate as well as the 95% CI.
 
@@ -378,9 +442,10 @@ Evaluate how well the model predicts the BlueNile diamond's price. Think about t
 
 ## Final Thoughts
 Notes:
+Tiffany vs. Costco: Which Diamond Ring is Better (http://www.businessweek.com/articles/2013-05-06/tiffany-vs-dot-costco-which-diamond-ring-is-better)
 
+But Costco Sells Pricy Diamonds Too (http://www.costco.com/CatalogSearch?catalogId=10701&langId=-1&keyword=Engagement&storeId=10301&refine=30108%2b209%2b238%2b210%2b)
 ***
 
 Click **KnitHTML** to see all of your hard work and to have an html
 page of this lesson, your answers, and your notes!
-
