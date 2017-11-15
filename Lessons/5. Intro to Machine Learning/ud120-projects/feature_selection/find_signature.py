@@ -1,15 +1,19 @@
 #!/usr/bin/python
 
 import pickle
-import numpy
-numpy.random.seed(42)
+import numpy as np
+np.random.seed(42)
 
 
 ### The words (features) and authors (labels), already largely processed.
 ### These files should have been created from the previous (Lesson 10)
 ### mini-project.
-words_file = "../text_learning/your_word_data.pkl" 
-authors_file = "../text_learning/your_email_authors.pkl"
+#words_file = "../text_learning/your_word_data.pkl" 
+#authors_file = "../text_learning/your_email_authors.pkl"
+
+words_file = "../text_learning/your_word_data_part2.pkl"
+authors_file = "../text_learning/your_email_authors_part2.pkl"
+
 word_data = pickle.load( open(words_file, "r"))
 authors = pickle.load( open(authors_file, "r") )
 
@@ -38,6 +42,27 @@ labels_train   = labels_train[:150]
 
 
 ### your code goes here
+print "<Train>\nData Points: {0}, Number of Features: {1}\n".format(np.shape(features_train)[0], features_train.shape[1])
+print "<Label>\nLabel Shape: {0}\n".format(np.shape(labels_train))
+#print features_train[:2, :]
 
+from sklearn import tree
+from sklearn.metrics import accuracy_score
 
+dt_clf = tree.DecisionTreeClassifier()
+dt_clf.fit(features_train, labels_train)
 
+pred = dt_clf.predict(features_test)
+
+acc = accuracy_score(pred, labels_test)
+print "Accuracy: ", acc
+
+print np.shape(dt_clf.feature_importances_)
+imp = dt_clf.feature_importances_
+sort_imp = np.argsort(imp)[::-1]
+max_idx = sort_imp[0]
+print "Most important features: ", max_idx, imp[max_idx]
+print "Higer than 0.2 importance: ", len(imp[imp > 0.2])
+
+feature_names = vectorizer.get_feature_names()
+print "Feature name:", feature_names[max_idx]
