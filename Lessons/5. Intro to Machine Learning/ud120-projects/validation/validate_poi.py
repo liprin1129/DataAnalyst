@@ -36,5 +36,15 @@ pred = clf.predict(features)
 from sklearn.metrics import accuracy_score
 acc = accuracy_score(pred, labels)
 
-print "Accuracy: ", acc
+print "Accuracy before seperating test set: ", acc
 
+from sklearn.cross_validation import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.3, random_state=42)
+
+new_clf = tree.DecisionTreeClassifier()
+new_clf = new_clf.fit(X_train, y_train)
+
+new_pred = new_clf.predict(X_test)
+
+new_acc = accuracy_score(new_pred, y_test)
+print "Accuracy after seperating test set:", new_acc
