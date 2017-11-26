@@ -3,10 +3,6 @@ import pprint
 from collections import defaultdict
 from tqdm import tqdm
 
-#osm_file = "data/sample.osm"
-#osm_file = "data/Sheffield/3000_sample.osm"
-#osm_file = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
-osm_file = "sample.osm"
 
 def count_tags(file_name):
     node_types = defaultdict(int)
@@ -18,9 +14,16 @@ def count_tags(file_name):
 
     return node_types
 
-tags_dict = count_tags(osm_file)
 
-print(tags_dict)
+if __name__ == "__main__":
+    #osm_file = "data/sample.osm"
+    #osm_file = "data/Sheffield/3000_sample.osm"
+    #osm_file = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
+    osm_file = "sample.osm"
+    
+    tags_dict = count_tags(osm_file)
+
+    print(tags_dict)
 '''
 import xml.etree.cElementTree as ET
 

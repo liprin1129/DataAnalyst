@@ -1,10 +1,8 @@
 import xml.etree.cElementTree as ET
-import pprint
-from collections import defaultdict
+#import pprint
+#from collections import defaultdict
 from tqdm import tqdm
 
-#osm_file = "data/5000_sample.osm"
-osm_file = "sample.osm"
 
 def node_element(file_name):
     for event, elem in tqdm(ET.iterparse(file_name)):
@@ -20,4 +18,9 @@ def node_element(file_name):
                     print tag.attrib
                 print 
 
-node_element(osm_file)
+
+if __name__ == "__main__":
+    #osm_file = "data/5000_sample.osm"
+    osm_file = "sample.osm"
+    
+    node_element(osm_file)

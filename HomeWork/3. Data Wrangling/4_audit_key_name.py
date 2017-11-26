@@ -4,15 +4,6 @@ from tqdm import tqdm
 import re
 import sys
 
-#OSM_FILE = "data/Sheffield/3000_sample.osm"
-#OSM_FILE = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
-#OSM_FILE = 'data/Sheffield/'+sys.argv[1]
-OSM_FILE = "Sheffield_data.osm"
-
-street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
-expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road", 
-            "Trail", "Parkway", "Commons", "Crescent"]
-
 def audit(osmfile):
     osm_file = open(osmfile, "r")
     street_types = defaultdict(set)
@@ -29,6 +20,9 @@ def is_street_name(elem):
     return (elem.attrib['k'] == "addr:street")
 
 def audit_street_type(street_types, street_name):
+    street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
+    expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road", 
+                "Trail", "Parkway", "Commons", "Crescent"]
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
@@ -79,21 +73,30 @@ def audit_key_name(file_in):
     #return key_names
     return node_dict, nd_dict, member_dict, relation_dict, way_dict
 
-'''
-problematic_street_name = audit_street_name(OSM_FILE)
-for key, street_name in problematic_street_name.iteritems():
-    print key, street_name
-'''
 
-#key_names = audit_key_name(OSM_FILE)
-node_dict, nd_dict, member_dict, relation_dict, way_dict = audit_key_name(OSM_FILE)
-
-for n in ['node', 'nd', 'member', 'relation', 'way']:
-    print '<< {0} >>'.format(n)
-    for key, value in sorted( eval(n+'_dict').iteritems(), key=lambda (k,v): (v,k), reverse=True):
-        print '\t{0}: {1}'.format(key, value)
-    print '\n'
+if __name__ == "__main__":
+    #OSM_FILE = "data/Sheffield/3000_sample.osm"
+    #OSM_FILE = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
+    #OSM_FILE = 'data/Sheffield/'+sys.argv[1]
+    OSM_FILE = "sample.osm"
+    #OSM_FILE  = 'Sheffield_data.osm'
+        
+        
+    '''
+    problematic_street_name = audit_street_name(OSM_FILE)
+    for key, street_name in problematic_street_name.iteritems():
+        print key, street_name
+    '''
     
-#for key, value in key_names.items():
-#for key, value in sorted(key_names.iteritems(), key=lambda (k,v): (v,k), reverse=True):
-#    print '{0}: {1}'.format(key, value)
+    #key_names = audit_key_name(OSM_FILE)
+    node_dict, nd_dict, member_dict, relation_dict, way_dict = audit_key_name(OSM_FILE)
+    
+    for n in ['node', 'nd', 'member', 'relation', 'way']:
+        print '<< {0} >>'.format(n)
+        for key, value in sorted( eval(n+'_dict').iteritems(), key=lambda (k,v): (v,k), reverse=True):
+            print '\t{0}: {1}'.format(key, value)
+        print '\n'
+        
+    #for key, value in key_names.items():
+    #for key, value in sorted(key_names.iteritems(), key=lambda (k,v): (v,k), reverse=True):
+    #    print '{0}: {1}'.format(key, value)

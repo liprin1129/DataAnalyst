@@ -15,7 +15,7 @@ This map is of my hometown, so I’m more interested to see what database queryi
 ## 1. Data Audit
 
 #### 1.1. Unique tags
-For the first data audit task, '1\_unique\_tags.py' counts the unique tags.
+For the first data audit task, '1\_unique\_tags.py' counts the number of unique tags.
 
 Name | Count
 ------------ | -------------
@@ -32,10 +32,10 @@ osm            | 1
 
 #### 1.2. Attributes types
 
-So I checked the type of attribtues of those elements. 
+So I checked the type of attribtues of those elements for consistency of the data. 
 
-	```Python
-	< node >
+```Python
+< node >
 	changeset : set([<type 'int'>])
 	uid : set([<type 'int'>])
 	timestamp : set([<type 'datetime.datetime'>])
@@ -45,19 +45,19 @@ So I checked the type of attribtues of those elements.
 	lat : set([<type 'float'>])
 	id : set([<type 'int'>])
 	
-	< nd >
+< nd >
 	ref : set([<type 'int'>])
 	
-	< member >
+< member >
 	ref : set([<type 'int'>])
 	role : set([<type 'str'>])
 	type : set([<type 'str'>])
 	
-	< tag >
+< tag >
 	k : set([<type 'str'>])
 	v : set([<type 'int'>, <type 'str'>])
 	
-	< relation >
+< relation >
 	changeset : set([<type 'int'>])
 	uid : set([<type 'int'>])
 	timestamp : set([<type 'datetime.datetime'>])
@@ -65,18 +65,18 @@ So I checked the type of attribtues of those elements.
 	user : set([<type 'str'>])
 	id : set([<type 'int'>])
 	
-		< way >
+< way >
 	changeset : set([<type 'int'>])
 	uid : set([<type 'int'>])
 	timestamp : set([<type 'datetime.datetime'>])
 	version : set([<type 'int'>])
 	user : set([<type 'str'>])
 	id : set([<type 'int'>])
-    ```
+```
 
-Type of major nodes seems not including critical issue, as all nodes have unique attribute value except attribute **v** in tag element. However, it is not a problematic because tag elements hold various kind of values accordingly different keys. For example,
+A type of major nodes seems not including critical problems. All nodes have unique attribute value. However, attribute **v** in **tag** element has multiple types, and it seems to be concidered inconsistent data. Although the multiple types in **v** element, it is not a problematic case, because **tag** elements hold various kind of values accordingly different keys. For example,
 
-    ```XML
+```XML
     <tag k="name" v="Raeburn Road/Morland Drive" />
     <tag k="source" v="naptan_import" />
     <tag k="highway" v="bus_stop" />
@@ -85,13 +85,13 @@ Type of major nodes seems not including critical issue, as all nodes have unique
     <tag k="naptan:Bearing" v="N" />
     <tag k="naptan:AtcoCode" v="370026690" />
     <tag k="naptan:Landmark" v="Bottom of Steps" />
-    ```
+```
 
-Above code has 8 different keys, **k**, in a tag element's attribute; **name, source, highway, alt_name, naptan:Street, naptan:Bearing, naptan:AtcoCode, naptan:Landmark**, and types of those keys' value are either strings or numbers.
+Above code has 8 different keys for **k** of tag element's attribute; **name, source, highway, alt_name, naptan:Street, naptan:Bearing, naptan:AtcoCode, naptan:Landmark**, and types of those values are either strings or numbers. 
 
 #### 1.3. Key and value of tag attributes
 
-To know whether the elements are meaningfule, in other words what kind of information in elements is the most dominant, I counted their children based on tag names.
+To know whether the elements are meaningfule, in other words what kind of information in elements is the most dominant, I counted the number of their children in accordance with tag names.
 
 node                        | relation                  | way
 --------------------------- | ------------------------- | ----------------------
@@ -220,7 +220,7 @@ created_by: 2983            | building: 80              | maxspeed: 2784
 	.
 	```
 -->
-Interestingly, there were no additional tag children in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information.
+Interestingly, there were no additional children tag in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information.
 
 **node**, **relation**, and **way** elements contain children nodes called tag, but they are not included in **member** and **nd** elements. In other words, there are no additional information in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information conceived in sub-nodes, tag. Thus, I only focus the further audit tasks on those three elements.
 
@@ -290,7 +290,7 @@ S12 2 | 103788994, 101781166, 101781189, 101781161])
 S6 | 107368123, 107368125
 S9 5 | 106300879
 
-There is no way to correct those postal codes, unless a person visit there and identify personally. Therefore, I removed the above ids containing wrong postal codes from the dataset.
+There is no way to correct those postal codes, unless I visit there and identify whether the postal codes are correct or not personally. Therefore, I removed the ids above containing wrong postal codes just for data's completeness.
 
 <!-------------->
 <!-- Template -->

@@ -3,10 +3,6 @@ from collections import defaultdict
 from tqdm import tqdm
 import re
 
-#OSM_FILE = "data/Sheffield/3000_sample.osm"
-#OSM_FILE = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
-#OSM_FILE = 'data/Sheffield/'+sys.argv[1]
-OSM_FILE = "Sheffield_data.osm"
 
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square", "Lane", "Road", 
@@ -86,6 +82,13 @@ def audit_key_name(file_in):
     return node_dict, nd_dict, member_dict, relation_dict, way_dict
 '''
 
-problematic_street_name = audit_street_name(OSM_FILE)
-for key, street_name in problematic_street_name.iteritems():
-    print key, street_name
+if __name__ == "__main__":
+    #OSM_FILE = "data/Sheffield/3000_sample.osm"
+    #OSM_FILE = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
+    OSM_FILE = 'data/Sheffield/Sheffield_data.osm'
+    #OSM_FILE = "sample.osm"
+    #OSM_FILE  = 'Sheffield_data.osm'
+    
+    problematic_street_name = audit_street_name(OSM_FILE)
+    for key, street_name in problematic_street_name.iteritems():
+        print key, street_name
