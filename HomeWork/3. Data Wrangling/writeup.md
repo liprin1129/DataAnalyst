@@ -229,35 +229,55 @@ Interestingly, there were no additional children tag in **member** and **nd** el
 #### 2.1. Problems in street name
 In Sheffield, there are many unique road types which go beyond the given basic types; *Street, Avenue, Boulevard, Drive, Court, Place, Square, Lane*, and *Road*, for example *Upperthorpe Glen*, and *Fargate*. So after I implemented a code (problematic\_street\_name.py) which tells about unique street names, in other world not be included in the given basic road type list, I searched the unique street names on Google map, and checked if they are really unique name or mistyped name.
 
-- Place name and not a street name: 
+- Building name: 
 	- Edmund Road Business Centre
-	- Riverside Park Industrial Estate 
-	- Sheaf Gardens Industrial Estate (also not in Sheffield)
-	- Upperthorpe -> Upperthorpe road
-	- Mount Pleasant Park -> Mount Pleasant Road
-	- Archer Road Retail Park -> Archer Road
-	- Victoria Villas -> Victoria Road or Victoria Street)
+	- Fargate
+- Not in Sheffield:
+	- Riverside Park Industrial Estate
+	- Sheaf Gardens Industrial Estate
 - Abbrebiation: 
-	- Eccelsall rd
+	- rd -> Road
 - Not in Sheffield: 
 	- Waterthorpe Greenway is in Westfield
 	- Sheaf Gardens Industrial Estate in Middlesbrough
 	- Sheffield Digital Campus (no where)
 - duplicated:
 	- Barker's Pool and Barkers Pool
+	- Utah Terrace and Utah terrace
 - Wrong name: 
 	- Utah Terrace -> Utah Road
 	- Westgate -> West Street
 	- 462 -> 462 London road (not sure)
+	- Upperthorpe -> Upperthorpe road
+	- Mount Pleasant Park -> Mount Pleasant Road
+	- Archer Road Retail Park -> Archer Road
+	- Victoria Villas -> Victoria Road or Victoria Street
 - Additional Road Type:
 	- Green
+	- East
 	- North
 	- Gardens
 	- South
+	- West
 	- View
-	- Parade
 	- Walk
 	- Row
+	- Close
+	- Common
+	- Gate
+	- Grove
+	- Head
+	- Hill
+	- Mount
+	- Parade
+	- Pool
+	- Rise
+	- Row
+	- View
+	- Crooks
+	- Park
+	- Bank
+	- Lea
 - Unique Road Name:
 	- Crookes
 	- Backfields
@@ -266,8 +286,27 @@ In Sheffield, there are many unique road types which go beyond the given basic t
 	- The Crofts
 	- Moorfields
 	- Rutland Park
+	- West Bar
+	- Commonside
+	- Crescent
+	- The Dale
+	- Upperthorpe Glen
+	- Waterthorpe Greenway
+	- Hartshead
+	- Haymarket
+	- Busk Knoll
+	- Meadowhead
+	- The Moor
+	- Moorfields
+	- Berkeley Precinct
+	- Upperthorpe
+	- Moor Valley
+	- Wicker
+	- Rutland Park
+	- Smithfield
 
-It problematic\_street\_name.py, I added two lists along side the given expected road name list. Road types which are used in Sheffield were added to the first list. Second list have unique road names of the place.
+
+It problematic\_street\_name.py, I added the two lists (**unique** and **additional**) which refer unique road names and additional road types respectively, along side with the given expected road name list. I also made a list of names (removed) which are not in Sheffield or building names. Finally, I filled the **mapping** list to convert wrong street types and names to correct ones.
 
 #### 2.2. Problems in postal code
 
