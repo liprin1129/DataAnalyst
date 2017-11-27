@@ -9,7 +9,7 @@ expected = ["Street", "Avenue", "Boulevard", "Drive", "Court", "Place", "Square"
             "Trail", "Parkway", "Crescent"]
 
 additional = ['Hill', 'Way', 'Gate', 'Commons', 'East', 'Bank', 'Rise', 'Green', 'North', 'Gardens', 'South', 
-              'View', 'walk', 'Close', 'Row']
+              'View', 'walk', 'Walk', 'Close', 'Row']
               
 unique_name = ['Smithfield', 'Crookes', 'The Dale', 'Dovecott Lea', 'Silver Street Head', 'Moor Valley', 
                'Rutland Park', 'Commonside', 'Wicker', 'Berkeley Precinct', 'Haymarket', 'Backfields',
@@ -37,9 +37,20 @@ def audit_street_type(street_types, street_name):
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
-        if street_type not in expected:
-            street_types[street_type].add(street_name)
-          
+        if ((street_type not in expected ) and 
+            (street_type not in additional) and
+            (street_type not in unique_name)):
+            #if street_type not in additional:
+            #    if street_type not in unique_name:
+            #print(street_type, len(street_type))
+            #street_types[street_type].add(street_name)
+            print(street_name)
+            if street_name == 'Victoria Villas':
+                street_name = "Victoria Road or Victoria Street"
+                #print("BBB")
+            elif street_name == "Edmund Road Business Centre":
+                print("AAA!!!!:", street_name)
+                
 def audit_street_name(file_in):
     street_types = defaultdict(set)
     
@@ -49,6 +60,8 @@ def audit_street_name(file_in):
             if elem.tag == 'node' or elem.tag == "way":                                
                 for tag in elem.iter("tag"):
                     if is_street_name(tag):
+                        #print elem.clear()
+                        elem.getparent()
                         audit_street_type(street_types, tag.attrib["v"])
 
     return street_types
@@ -83,11 +96,8 @@ def audit_key_name(file_in):
 '''
 
 if __name__ == "__main__":
-    #OSM_FILE = "data/Sheffield/3000_sample.osm"
-    #OSM_FILE = "data/Sheffield/ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"
-    OSM_FILE = 'data/Sheffield/Sheffield_data.osm'
-    #OSM_FILE = "sample.osm"
-    #OSM_FILE  = 'Sheffield_data.osm'
+    #OSM_FILE = 'data/Sheffield/Sheffield_data.osm'
+    OSM_FILE = "data/Sheffield/sample.osm"
     
     problematic_street_name = audit_street_name(OSM_FILE)
     for key, street_name in problematic_street_name.iteritems():
