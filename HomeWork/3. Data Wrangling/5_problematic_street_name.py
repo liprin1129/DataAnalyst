@@ -15,6 +15,23 @@ unique_name = ['Smithfield', 'Crookes', 'The Dale', 'Dovecott Lea', 'Silver Stre
                'Rutland Park', 'Commonside', 'Wicker', 'Berkeley Precinct', 'Haymarket', 'Backfields',
                'Shalesmoor', 'Birkendale', 'The Crofts', 'Moorfields']
 
+delete_name = ["Edmund Road Business Centre", "Riverside Park Industrial Estate", 
+          "Sheaf Gardens Industrial Estate", "Waterthorpe Greenway", 
+          "Sheaf Gardens Industrial Estate", "Sheffield Digital Campus"]
+# UPDATE THIS VARIABLE
+mapping = { "St.": "Street",
+            "Ave": "Avenue",
+            "Rd.": "Road",
+            "rd" : "Road",
+            "Utah Terrace": "Utah Road",
+            "Westgate": "West Street",
+            "462": "462 London road",
+            "Upperthorpe": "Upperthorpe road",
+            "Mount Pleasant Park": "Mount Pleasant Road",
+            "Archer Road Retail Park": "Archer Road",
+            "Victoria Villas": "Victoria Road"
+            }
+
 '''
 def audit(osmfile):
     osm_file = open(osmfile, "r")
@@ -37,34 +54,64 @@ def audit_street_type(street_types, street_name):
     m = street_type_re.search(street_name)
     if m:
         street_type = m.group()
-        if ((street_type not in expected ) and 
+        
+        remove_flag = False # check whether a element need to be deleted
+        wrong_name_flag = False # 
+        
+        if street_name in delete_name:
+            remove_flag = True
+            
+        elif ((street_type not in expected ) and 
             (street_type not in additional) and
             (street_type not in unique_name)):
             #if street_type not in additional:
             #    if street_type not in unique_name:
             #print(street_type, len(street_type))
             #street_types[street_type].add(street_name)
-            print(street_name)
-            if street_name == 'Victoria Villas':
-                street_name = "Victoria Road or Victoria Street"
-                #print("BBB")
-            elif street_name == "Edmund Road Business Centre":
-                print("AAA!!!!:", street_name)
+            # print(street_name)
+            wrong_name_flag = True
+            
+        else:
+            street_types[street_type].add(street_name)
+            
+        return remove_flag, wrong_name_flag
                 
 def audit_street_name(file_in):
     street_types = defaultdict(set)
     
-    with open(file_in, "r") as osm_file:        
-        for event, elem in tqdm(ET.iterparse(osm_file, events=("start",))):
-
-            if elem.tag == 'node' or elem.tag == "way":                                
+    with open(file_in, "r") as osm_file:
+        context = ET.iterparse(osm_file, events=("start", "end"))
+        eventt, root = context.next()
+        
+        for event, elem in tqdm(context):
+            if (elem.tag == 'node' or elem.tag == "way") and event == 'end':
                 for tag in elem.iter("tag"):
                     if is_street_name(tag):
-                        #print elem.clear()
-                        elem.getparent()
-                        audit_street_type(street_types, tag.attrib["v"])
-
+                        remove_flag, wrong_flag = audit_street_type(street_types, 
+                                                        tag.attrib["v"])
+                        
+                        ## delete element if street is not in Sheffield
+                        if remove_flag == True:
+                            elem.clear()
+                            
+                        elif wrong_flag == True:
+                            tag.attrib["v"] = update_name(tag.attrib["v"], mapping)
+    
     return street_types
+
+def update_name(name, mapping):
+    #pprint.pprint(name)
+    
+    street_type_compiler = re.compile(r'\w+\S*$', re.IGNORECASE)
+    
+    wrong_name_obj = street_type_compiler.search(name)
+    wrong_name_str = wrong_name_obj.group()
+    
+    #pprint.pprint(street_type_compiler.sub('Avenue', name)) # example
+    #pprint.pprint(street_type_compiler.sub(mapping[wrong_name_str], name))
+    
+    name = street_type_compiler.sub(mapping[wrong_name_str], name)
+    return name
 '''
 def print_street_name(file_in):
     with open(file_in, 'r') as osm_file:
