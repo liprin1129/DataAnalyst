@@ -154,6 +154,11 @@ The final return value for a "way" element should look something like:
                'value': '366409'}]}
 """
 
+from problematic_street_name import audit_type, audit_street_type, is_street_name
+from problematic_postcode import audit_wrong_postcode
+from collections import defaultdict
+from tqdm import tqdm
+
 import csv
 import codecs
 import pprint
@@ -165,8 +170,8 @@ import cerberus
 import schema
 
 #OSM_PATH = "example.osm"
-OSM_PATH = "data/Sheffield/sample.osm"
-#OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
+#OSM_PATH = "data/Sheffield/sample.osm"
+OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
 
 NODES_PATH = "nodes.csv"
 NODE_TAGS_PATH = "nodes_tags.csv"
@@ -293,6 +298,7 @@ def get_element(osm_file, tags=('node', 'way', 'relation')):
     """Yield element if it is the right type of tag"""
 
     context = ET.iterparse(osm_file, events=('start', 'end'))
+    #print "Data length: ", context
     _, root = next(context)
     for event, elem in context:
         if event == 'end' and elem.tag in tags:
@@ -348,21 +354,62 @@ def process_map(file_in, validate):
         way_tags_writer.writeheader()
 
         validator = cerberus.Validator()
-
-        for element in get_element(file_in, tags=('node', 'way')):
+        
+        street_types = defaultdict(set) ######For Auditing Check#######
+        postcode_name = defaultdict(set) ######For Auditing Check#######
+        
+        for element in tqdm(get_element(file_in, tags=('node', 'way'))):
             el = shape_element(element)
             if el:
                 if validate is True:
                     validate_element(el, validator)
 
                 if element.tag == 'node':
+                    
+                    building = None
+                    for tag in element.iter("tag"):
+                        if tag.attrib['k'] == 'building':
+                            building = tag.attrib['v']
+                                
+                    for tag in element.iter("tag"):
+                        if is_street_name(tag):
+                            street = tag.attrib['v']
+                            street_type_flag = audit_street_type(street_types, street)
+                            postcode_flag = audit_wrong_postcode(postcode_name, element.attrib['id'], tag.attrib['v'], building)
+                            
+                            if street_type_flag or postcode_flag == True:
+                                    element.clear()
+                            
+                            elif type(street_type_flag) == str:
+                                tag.attrib['v'] = returned_value
+                                
                     nodes_writer.writerow(el['node'])
                     node_tags_writer.writerows(el['node_tags'])
+                        
                 elif element.tag == 'way':
+                    
+                    building = None
+                    for tag in element.iter("tag"):
+                        if tag.attrib['k'] == 'building':
+                            building = tag.attrib['v']
+                
+                    for tag in element.iter("tag"):
+                        if is_street_name(tag):
+                            street = tag.attrib['v']
+                            street_type_flag = audit_street_type(street_types, street)
+                            postcode_flag = audit_wrong_postcode(postcode_name, element.attrib['id'], tag.attrib['v'], building)
+                            
+                            if street_type_flag or postcode_flag == True:
+                                element.clear()
+                            
+                            elif type(street_type_flag) == str:
+                                tag.attrib['v'] = returned_value
+                
                     ways_writer.writerow(el['way'])
                     way_nodes_writer.writerows(el['way_nodes'])
                     way_tags_writer.writerows(el['way_tags'])
-
+        print "street types error: ", street_types
+        print "postcode error: ", street_types
 
 if __name__ == '__main__':
     # Note: Validation is ~ 10X slower. For the project consider using a small

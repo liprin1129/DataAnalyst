@@ -113,9 +113,6 @@ if __name__ == "__main__":
         print key, street_name
 '''
 
-#OSMFILE = "data/Sheffield/sample.osm"
-OSMFILE = 'data/Sheffield/Sheffield_data.osm'
-
 street_type_re = re.compile(r'\b\S+\.?$', re.IGNORECASE)
 
 
@@ -175,7 +172,7 @@ def is_street_name(elem):
     return (elem.attrib['k'] == "addr:street")
 
 
-def audit(osmfile):
+def audit_type(osmfile):
     osm_file = open(osmfile, "r")
     street_types = defaultdict(set)
     for event, elem in tqdm(ET.iterparse(osm_file, events=("start",))):
@@ -233,7 +230,7 @@ def update_type(name, mapping):
 
 
 def test():
-    st_types = audit(OSMFILE)
+    st_types = audit_type(OSMFILE)
     #assert len(st_types) == 3
     pprint.pprint(dict(st_types))
     
@@ -247,39 +244,8 @@ def test():
             if name == "Baldwin Rd.":
                 assert better_name == "Baldwin Road"
     '''
-
-def test2():
-    def _audit_street_type(street_types, street_name):
-        m = street_type_re.search(street_name)
-        if m:
-            street_type = m.group()
-            if street_type not in expected:
-                street_types[street_type].add(street_name)
-                
-        #pprint.pprint(street_types)
-    
-    
-    def _is_street_name(elem):
-        return (elem.attrib['k'] == "addr:street")
-    
-    
-    def _audit(osmfile):
-        osm_file = open(osmfile, "r")
-        street_types = defaultdict(set)
-        for event, elem in tqdm(ET.iterparse(osm_file, events=("start",))):
-    
-            if elem.tag == "node" or elem.tag == "way":
-                for tag in elem.iter("tag"):
-                    if _is_street_name(tag):
-                        _audit_street_type(street_types, tag.attrib['v'])
-        osm_file.close()
-        return street_types
-    
-    pprint.pprint(dict(_audit(OSMFILE)))
     
 if __name__ == '__main__':
+    OSMFILE = "data/Sheffield/sample.osm"
+    #OSMFILE = 'data/Sheffield/Sheffield_data.osm'
     test()
-    
-    print "test 2"
-    test2()
-    #print mapping_type['rd']
