@@ -164,7 +164,9 @@ import cerberus
 
 import schema
 
-OSM_PATH = "data/Sheffield/3000_sample.osm"
+#OSM_PATH = "example.osm"
+OSM_PATH = "data/Sheffield/sample.osm"
+#OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
 
 NODES_PATH = "nodes.csv"
 NODE_TAGS_PATH = "nodes_tags.csv"
@@ -197,10 +199,10 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
     # YOUR CODE HERE
     if element.tag == 'node':
         '''
-        #for attrib_key, attrib_value in element.attrib.iteritems():
-        #print '\t-', attrib_key, ':',  attrib_value
-        #print '\n'
-        
+        for attrib_key, attrib_value in element.attrib.iteritems():
+            print '\t-', attrib_key, ':',  attrib_value
+        print '\n'
+        '''
         for field in node_attr_fields:
             try:
                 #element.attrib['field']
@@ -233,11 +235,9 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             tags.append(tag)
 
         #print node_attribs, tags, '\n'
-        '''
         return {'node': node_attribs, 'node_tags': tags}
 
     elif element.tag == 'way':
-        '''
         tags = []
         for field in way_attr_fields:
             try:
@@ -282,8 +282,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     #print tag_tag
                     tags.append(tag_tag)
 
-        print tags
-        '''
+        #print tags
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
 
 
@@ -304,7 +303,6 @@ def get_element(osm_file, tags=('node', 'way', 'relation')):
 def validate_element(element, validator, schema=SCHEMA):
     """Raise ValidationError if element does not match schema"""
     if validator.validate(element, schema) is not True:
-        print 'Hahahahahaha', '\n'
         field, errors = next(validator.errors.iteritems())
         message_string = "\nElement of type '{0}' has the following errors:\n{1}"
         error_string = pprint.pformat(errors)
@@ -330,6 +328,7 @@ class UnicodeDictWriter(csv.DictWriter, object):
 # ================================================== #
 def process_map(file_in, validate):
     """Iteratively process each XML element and write to csv(s)"""
+
     with codecs.open(NODES_PATH, 'w') as nodes_file, \
          codecs.open(NODE_TAGS_PATH, 'w') as nodes_tags_file, \
          codecs.open(WAYS_PATH, 'w') as ways_file, \
@@ -364,13 +363,8 @@ def process_map(file_in, validate):
                     way_nodes_writer.writerows(el['way_nodes'])
                     way_tags_writer.writerows(el['way_tags'])
 
-def validation_check(file_in):
-    for element in get_element(file_in, tags=('node', 'way')):
-        el = shape_element(element)
-        validate_element(el, cerberus.Validator())
-        
+
 if __name__ == '__main__':
     # Note: Validation is ~ 10X slower. For the project consider using a small
     # sample of the map when validating.
-    #process_map(OSM_PATH, validate=True)
-    validation_check(OSM_PATH)
+    process_map(OSM_PATH, validate=True)
