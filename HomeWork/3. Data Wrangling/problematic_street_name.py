@@ -167,6 +167,25 @@ def audit_street_type(street_types, street_name):
              return False
     #pprint.pprint(street_types)
 
+def audit_street_type_for_data_py(street_name):
+    m = street_type_re.search(street_name)
+    if m:
+        street_type = m.group()
+        if street_name in unique:
+            return False
+        
+        elif (street_name in removed):
+            #print(True, street_type,":", street_name)
+            return True
+        
+        elif street_name in mapping_name.keys():
+            return update_name(street_name, mapping_name)
+        
+        elif street_type in mapping_type.keys():
+            return update_type(street_name, mapping_type)
+        
+        else:
+            return street_name
 
 def is_street_name(elem):
     return (elem.attrib['k'] == "addr:street")
