@@ -170,8 +170,8 @@ import cerberus
 import schema
 
 #OSM_PATH = "example.osm"
-OSM_PATH = "data/Sheffield/sample.osm"
-#OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
+#OSM_PATH = "data/Sheffield/sample.osm"
+OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
 
 NODES_PATH = "nodes.csv"
 NODE_TAGS_PATH = "nodes_tags.csv"
@@ -224,37 +224,18 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             tag_k = tag_node.attrib['k']
 
             if not problem_chars.search(tag_k):
-                    
                 tag = {}
-
-                if is_street_name(tag_node):
-                    street_name = tag_node.attrib['v']
-                    if not audit_street_type(street_types, street_name):
-
-                        tag['id'] = element.attrib['id']
-                        tag['value'] = tag_node.attrib['v']
-                        print street_name
-
-                        try:
-                            key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
-                            tag['key'] = key_value[0][1]
-                            tag['type'] = key_value[0][0]
-                        except:
-                            tag['key'] = tag_node.attrib['k']
-                            tag['type'] = 'regular'
-                        
-                else:
-                    tag['id'] = element.attrib['id']
-                    tag['value'] = tag_node.attrib['v']
+                tag['id'] = element.attrib['id']
+                tag['value'] = tag_node.attrib['v']
                 
-                    # divide key and value according to semi-colon
-                    try:
-                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
-                        tag['key'] = key_value[0][1]
-                        tag['type'] = key_value[0][0]
-                    except:
-                        tag['key'] = tag_node.attrib['k']
-                        tag['type'] = 'regular'
+                # divide key and value according to semi-colon
+                try:
+                    key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                    tag['key'] = key_value[0][1]
+                    tag['type'] = key_value[0][0]
+                except:
+                    tag['key'] = tag_node.attrib['k']
+                    tag['type'] = 'regular'
 
             tags.append(tag)
 
@@ -286,6 +267,24 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             elif way_node.tag == 'tag':
                 tag_k = way_node.attrib['k']
                 #print tag_k
+
+                building = None
+                for tag in element.iter("tag"):
+                    if tag.attrib['k'] == 'building':
+                        building = tag.attrib['v']
+                        
+                for tag in element.iter("tag"):
+                    if is_street_name(tag):
+                        street = tag.attrib['v']
+                        street_type_flag = audit_street_type(street_types, street)
+                        postcode_flag = audit_wrong_postcode(postcode_name, element.attrib['id'], tag.attrib['v'], building)
+                            
+                        if street_type_flag or postcode_flag == True:
+                            element.clear()
+                                
+                        elif type(street_type_flag) == str:
+                            tag.attrib['v'] = returned_value
+                                
 
                 if LOWER_COLON.search(tag_k):
                     key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
@@ -406,24 +405,7 @@ def process_map(file_in, validate):
                     node_tags_writer.writerows(el['node_tags'])
                         
                 elif element.tag == 'way':
-                    
-                    building = None
-                    for tag in element.iter("tag"):
-                        if tag.attrib['k'] == 'building':
-                            building = tag.attrib['v']
-                
-                    for tag in element.iter("tag"):
-                        if is_street_name(tag):
-                            street = tag.attrib['v']
-                            street_type_flag = audit_street_type(street_types, street)
-                            postcode_flag = audit_wrong_postcode(postcode_name, element.attrib['id'], tag.attrib['v'], building)
-                            
-                            if street_type_flag or postcode_flag == True:
-                                element.clear()
-                            
-                            elif type(street_type_flag) == str:
-                                tag.attrib['v'] = returned_value
-                
+                                
                     ways_writer.writerow(el['way'])
                     way_nodes_writer.writerows(el['way_nodes'])
                     way_tags_writer.writerows(el['way_tags'])
