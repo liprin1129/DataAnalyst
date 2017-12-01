@@ -298,34 +298,35 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                 tag_k = way_node.attrib['k']
                 #print tag_k
 
-                if is_street_name(tag_node):
-                    street_name = tag_node.attrib['v']
+                if is_street_name(way_node):
+                    street_name = way_node.attrib['v']
                     
                     tag['id'] = element.attrib['id']
                     tag['value'] = audit_street_type_for_data_py(street_name)
                     print "\nWay street: {0}".format(tag['value'])
                     
-                    try:
+                    if LOWER_COLON.search(tag_k):
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
                         tag['key'] = key_value[0][1]
                         tag['type'] = key_value[0][0]
-                    except:
-                        tag['key'] = tag_node.attrib['k']
+                    else:
+                        tag['key'] = way_node.attrib['k']
                         tag['type'] = 'regular'
                             
-                elif is_postcode(tag_node):
+                elif is_postcode(way_node):
                     tag['id'] = element.attrib['id']
-                    tag['value'] = update_wrong_postcode(tag_node.attrib['v'])
+                    tag['value'] = update_wrong_postcode(way_node.attrib['v'])
                     print "\tWay street: {0}".format(tag['value'])
                     
-                    try:
+                    if LOWER_COLON.search(tag_k):
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
                         tag['key'] = key_value[0][1]
                         tag['type'] = key_value[0][0]
-                    except:
-                        tag['key'] = tag_node.attrib['k']
+                    else:
+                        tag['key'] = way_node.attrib['k']
                         tag['type'] = 'regular'
 
+                '''
                 elif LOWER_COLON.search(tag_k):
                     key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
 
@@ -342,7 +343,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     tag_tag['key'] = way_node.attrib['k']
                     tag_tag['value'] = way_node.attrib['v']
                     tag_tag['type'] = 'regular'
-
+                '''
                     #print tag_tag
                     tags.append(tag_tag)
 
