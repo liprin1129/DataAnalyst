@@ -230,7 +230,12 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     street_name = tag_node.attrib['v']
 
                     tag['id'] = element.attrib['id']
-                    tag['value'] = audit_street_type_for_data_py(street_name)
+                    street_name = audit_street_type_for_data_py(street_name)
+                    if street_name:
+                        tag['value'] = street_name
+
+                    else:
+                        tag['value'] = "NaN"
                     print "\nNode street: {0}".format(tag['value'])
 
                     try:
@@ -302,7 +307,12 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     street_name = way_node.attrib['v']
                     
                     tag['id'] = element.attrib['id']
-                    tag['value'] = audit_street_type_for_data_py(street_name)
+                    street_name = audit_stre33et_type_for_data_py(street_name)
+                    if street_name:
+                        tag['value'] = street_name
+
+                    else:
+                        tag['value'] = "NaN"
                     print "\nWay street: {0}".format(tag['value'])
                     
                     if LOWER_COLON.search(tag_k):
@@ -345,7 +355,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     tag_tag['type'] = 'regular'
                 '''
                     #print tag_tag
-                    tags.append(tag_tag)
+            tags.append(tag_tag)
 
         #print tags
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}

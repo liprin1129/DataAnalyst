@@ -172,11 +172,11 @@ def audit_street_type_for_data_py(street_name):
     if m:
         street_type = m.group()
         if street_name in unique:
-            return False
+            return street_name
         
         elif (street_name in removed):
             #print(True, street_type,":", street_name)
-            return True
+            return False
         
         elif street_name in mapping_name.keys():
             return update_name(street_name, mapping_name)
