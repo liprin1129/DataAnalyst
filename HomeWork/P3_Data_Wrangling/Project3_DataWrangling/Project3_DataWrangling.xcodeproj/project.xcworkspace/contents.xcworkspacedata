@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <Group
+      location = "group:../.."
+      name = "..">
+      <FileRef
+         location = "group:writeup.md">
+      </FileRef>
+      <FileRef
+         location = "group:data_origin.py~">
+      </FileRef>
+      <FileRef
+         location = "group:problematic_street_name.pyc">
+      </FileRef>
+      <FileRef
+         location = "group:data.py~">
+      </FileRef>
+      <FileRef
+         location = "group:3_audit_cases.py~">
+      </FileRef>
+      <FileRef
+         location = "group:4_street_name.py~">
+      </FileRef>
+      <FileRef
+         location = "group:problematic_postcode.pyc">
+      </FileRef>
+      <FileRef
+         location = "group:writeup.md~">
+      </FileRef>
+      <Group
+         location = "group:Project3_DataWrangling"
+         name = "Project3_DataWrangling">
+         <FileRef
+            location = "group:Project3_DataWrangling.xcodeproj">
+         </FileRef>
+         <FileRef
+            location = "group:CSV2SQLDatabase.py">
+         </FileRef>
+         <Group
+            location = "group:data"
+            name = "data">
+            <Group
+               location = "group:Shimane"
+               name = "Shimane">
+            </Group>
+            <Group
+               location = "group:Sheffield"
+               name = "Sheffield">
+               <Group
+                  location = "group:CSV"
+                  name = "CSV">
+                  <FileRef
+                     location = "group:ways_tags.csv">
+                  </FileRef>
+                  <FileRef
+                     location = "group:nodes_tags.csv">
+                  </FileRef>
+                  <FileRef
+                     location = "group:nodes.csv">
+                  </FileRef>
+                  <FileRef
+                     location = "group:ways.csv">
+                  </FileRef>
+                  <FileRef
+                     location = "group:ways_nodes.csv">
+                  </FileRef>
+               </Group>
+            </Group>
+         </Group>
+      </Group>
+      <FileRef
+         location = "group:2_hierachy.py~">
+      </FileRef>
+      <Group
+         location = "group:data"
+         name = "data">
+      </Group>
+      <FileRef
+         location = "group:schema.pyc">
+      </FileRef>
+      <FileRef
+         location = "group:sample.osm">
+      </FileRef>
+      <FileRef
+         location = "group:1_unique_tags.py~">
+      </FileRef>
+   </Group>
+   <FileRef
+      location = "group:../../data">
+   </FileRef>
+   <Group
+      location = "group:../../data"
+      name = "data">
+   </Group>
+   <FileRef
+      location = "self:">
+   </FileRef>
+</Workspace>

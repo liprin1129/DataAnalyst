@@ -154,6 +154,11 @@ The final return value for a "way" element should look something like:
                'value': '366409'}]}
 """
 
+from problematic_street_name import audit_street_type_for_data_py, is_street_name
+from problematic_postcode import update_wrong_postcode, is_postcode
+from collections import defaultdict
+from tqdm import tqdm
+
 import csv
 import codecs
 import pprint
@@ -164,7 +169,8 @@ import cerberus
 
 import schema
 
-OSM_PATH = "example.osm"
+OSM_PATH = "data/Sheffield/sample.osm"
+#OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
 
 NODES_PATH = "nodes.csv"
 NODE_TAGS_PATH = "nodes_tags.csv"
@@ -217,18 +223,54 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             tag_k = tag_node.attrib['k']
 
             if not problem_chars.search(tag_k):
+                    
                 tag = {}
-                tag['id'] = element.attrib['id']
-                tag['value'] = tag_node.attrib['v']
+
+                if is_street_name(tag_node):
+                    street_name = tag_node.attrib['v']
+
+                    tag['id'] = element.attrib['id']
+                    street_name = audit_street_type_for_data_py(street_name)
+                    if street_name:
+                        tag['value'] = street_name
+
+                    else:
+                        tag['value'] = "NaN"
+                    #print "\nNode street: {0}".format(tag['value'])
+
+                    try:
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag['key'] = key_value[0][1]
+                        tag['type'] = key_value[0][0]
+                    except:
+                        tag['key'] = tag_node.attrib['k']
+                        tag['type'] = 'regular'
+
+                elif is_postcode(tag_node):
+                    tag['id'] = element.attrib['id']
+                    tag['value'] = update_wrong_postcode(tag_node.attrib['v'])
+                    #print "\tNode postcode: {0}".format(tag['value'])
+
+                    try:
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag['key'] = key_value[0][1]
+                        tag['type'] = key_value[0][0]
+                    except:
+                        tag['key'] = tag_node.attrib['k']
+                        tag['type'] = 'regular'
+                    
+                else:
+                    tag['id'] = element.attrib['id']
+                    tag['value'] = tag_node.attrib['v']
                 
-                # divide key and value according to semi-colon
-                try:
-                    key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
-                    tag['key'] = key_value[0][1]
-                    tag['type'] = key_value[0][0]
-                except:
-                    tag['key'] = tag_node.attrib['k']
-                    tag['type'] = 'regular'
+                    # divide key and value according to semi-colon
+                    try:
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag['key'] = key_value[0][1]
+                        tag['type'] = key_value[0][0]
+                    except:
+                        tag['key'] = tag_node.attrib['k']
+                        tag['type'] = 'regular'
 
             tags.append(tag)
 
@@ -241,10 +283,10 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             try:
                 way_attribs[field] = element.attrib[field]
             except:
-                print "Fiead: ", field
-                print element.attrib[field]
+                #print "Field: ", field
+                #print element.attrib[field]
                 way_attribs[field] = None
-        #print way_attribs
+            #print way_attribs
 
         nd_idx, tag_idx = 0, 0
         for way_node in element:
@@ -263,7 +305,51 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                 tag_k = way_node.attrib['k']
                 #print tag_k
 
-                if LOWER_COLON.search(tag_k):
+                if is_street_name(way_node):
+                    street_name = way_node.attrib['v']
+                    
+                    tag_tag['id'] = element.attrib['id']
+                    street_name = audit_street_type_for_data_py(street_name)
+                    if street_name:
+                        tag_tag['value'] = street_name
+
+                    else:
+                        tag_tag['value'] = "NaN"
+                    #print "\nWay street: {0}".format(tag['value'])
+                    
+                    if LOWER_COLON.search(tag_k):
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag_tag['key'] = key_value[0][1]
+                        tag_tag['type'] = key_value[0][0]
+                    else:
+                        tag_tag['key'] = way_node.attrib['k']
+                        tag_tag['type'] = 'regular'
+                            
+                elif is_postcode(way_node):
+                    tag_tag['id'] = element.attrib['id']
+                    postcode = update_wrong_postcode(way_node.attrib['v'])
+                    if postcode:
+                        tag_tag['value'] = postcode
+                    else:
+                        tag_tag['value'] = "NaN"
+                    #print "\tWay street: {0}".format(tag['value'])
+                    
+                    if LOWER_COLON.search(tag_k):
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag_tag['key'] = key_value[0][1]
+                        tag_tag['type'] = key_value[0][0]
+                    else:
+                        tag_tag['key'] = way_node.attrib['k']
+                        tag_tag['type'] = 'regular'
+
+                else:
+                    tag_tag['id'] = element.attrib['id']
+                    tag_tag['key'] = way_node.attrib['k']
+                    tag_tag['value'] = way_node.attrib['v']
+                    tag_tag['type'] = 'regular'
+
+                '''
+                elif LOWER_COLON.search(tag_k):
                     key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
 
                     tag_tag['id'] = element.attrib['id']
@@ -273,16 +359,17 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
 
                     #print tag_tag
                     tags.append(tag_tag)
+
                 else:
                     tag_tag['id'] = element.attrib['id']
                     tag_tag['key'] = way_node.attrib['k']
                     tag_tag['value'] = way_node.attrib['v']
                     tag_tag['type'] = 'regular'
-
+                '''
                     #print tag_tag
-                    tags.append(tag_tag)
-
-#        print tags
+                tags.append(tag_tag)
+        #print(tags)
+        #print tags
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
 
 
@@ -293,6 +380,7 @@ def get_element(osm_file, tags=('node', 'way', 'relation')):
     """Yield element if it is the right type of tag"""
 
     context = ET.iterparse(osm_file, events=('start', 'end'))
+    #print "Data length: ", context
     _, root = next(context)
     for event, elem in context:
         if event == 'end' and elem.tag in tags:
@@ -348,8 +436,8 @@ def process_map(file_in, validate):
         way_tags_writer.writeheader()
 
         validator = cerberus.Validator()
-
-        for element in get_element(file_in, tags=('node', 'way')):
+        
+        for element in tqdm(get_element(file_in, tags=('node', 'way'))):
             el = shape_element(element)
             if el:
                 if validate is True:
@@ -358,11 +446,11 @@ def process_map(file_in, validate):
                 if element.tag == 'node':
                     nodes_writer.writerow(el['node'])
                     node_tags_writer.writerows(el['node_tags'])
+                        
                 elif element.tag == 'way':
                     ways_writer.writerow(el['way'])
                     way_nodes_writer.writerows(el['way_nodes'])
                     way_tags_writer.writerows(el['way_tags'])
-
 
 if __name__ == '__main__':
     # Note: Validation is ~ 10X slower. For the project consider using a small

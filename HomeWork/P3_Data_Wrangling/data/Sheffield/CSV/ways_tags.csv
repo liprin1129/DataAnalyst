@@ -1,0 +1,126 @@
+id,key,value,type
+4387940,highway,secondary,regular
+4387940,lanes,3,regular
+4387940,lit,yes,regular
+4387940,maxspeed,30 mph,regular
+4387940,name,Brook Hill,regular
+4387940,oneway,yes,regular
+4387940,ref,B6539,regular
+4387940,surface,asphalt,regular
+23178132,name,Spout Copse,regular
+23178132,highway,residential,regular
+26374076,name,Torksey Road,regular
+26374076,highway,residential,regular
+26374076,postal_code,s5,regular
+32143491,name,Newsham Road,regular
+32143491,highway,residential,regular
+32143491,postal_code,S8,regular
+37372457,name,Moorgate Grove,regular
+37372457,highway,residential,regular
+37372457,surface,paved,regular
+55546790,name,Wensleydale Road,regular
+55546790,highway,residential,regular
+69414312,layer,0,regular
+69414312,highway,footway,regular
+91804261,building,house,regular
+94998983,source,Bing,regular
+94998983,building,yes,regular
+96391543,source,Bing,regular
+96391543,building,yes,regular
+98213028,source,Bing,regular
+98213028,building,yes,regular
+101326977,access,no,regular
+101326977,highway,footway,regular
+103447999,source,Bing,regular
+103447999,building,yes,regular
+105066460,addr:housenumber,95,regular
+105066460,postcode,S1 4GE,addr
+105066460,street,Division Street,addr
+105066460,building,yes,regular
+105066460,contact:phone,+44 114 276 3565,regular
+105066460,name,Bliss,regular
+106446042,source,Bing,regular
+106446042,building,yes,regular
+108257684,source,Bing,regular
+108257684,building,yes,regular
+110444963,source,Bing,regular
+110444963,building,yes,regular
+112514306,highway,service,regular
+112514306,service,driveway,regular
+115393367,source,Bing,regular
+115393367,building,yes,regular
+117361543,source,Bing,regular
+117361543,building,yes,regular
+118335495,source,Bing,regular
+118335495,building,yes,regular
+120445818,source,Bing,regular
+120445818,landuse,grass,regular
+122028466,source,Bing,regular
+122028466,building,yes,regular
+123413489,source,Bing,regular
+123413489,building,yes,regular
+125101256,source,Bing,regular
+125101256,building,yes,regular
+127519130,name,Allenby Close,regular
+127519130,highway,service,regular
+129586659,source,Bing,regular
+129586659,building,yes,regular
+129586659,addr:city,Sheffield,regular
+129586659,street,Balmoral Crescent,addr
+129586659,addr:housenumber,12,regular
+132472976,source,Bing,regular
+132472976,building,yes,regular
+134964670,source,Bing,regular
+134964670,building,yes,regular
+136548753,source,Bing,regular
+136548753,building,yes,regular
+137331410,source,Bing,regular
+137331410,landuse,farmland,regular
+139698071,source,Bing,regular
+139698071,building,yes,regular
+142399964,source,Bing,regular
+142399964,building,yes,regular
+146060276,source,Bing,regular
+146060276,building,yes,regular
+147950001,source,Bing,regular
+147950001,building,yes,regular
+149299409,name,Haighenfield House,regular
+149299409,source,Bing,regular
+149299409,building,ruin,regular
+152133102,source,Bing,regular
+152133102,building,yes,regular
+154853678,name,Rotherham College of Art and Technology,regular
+154853678,source,Bing;survey,regular
+154853678,building,yes,regular
+158751060,source,Bing,regular
+158751060,building,yes,regular
+158751060,addr:city,Sheffield,regular
+158751060,street,Southend Road,addr
+158751060,addr:country,GB,regular
+158751060,addr:housenumber,63,regular
+168473653,source,Bing,regular
+168473653,building,yes,regular
+174014096,source,Bing,regular
+174014096,building,yes,regular
+206151330,power,sub_station,regular
+229997286,name,Cafe & Sandwich Shop,regular
+229997286,source,Bing;survey,regular
+229997286,amenity,cafe,regular
+229997286,building,shop,regular
+257101308,amenity,restaurant,regular
+292157508,building,house,regular
+328043812,name,Rose Hill Drive,regular
+328043812,highway,residential,regular
+339956314,source,GPS,regular
+339956314,highway,path,regular
+361676817,landuse,grass,regular
+365506298,landuse,grass,regular
+370545108,building,house,regular
+383068749,building,house,regular
+387152040,building,house,regular
+390607468,building,house,regular
+398368301,building,barn,regular
+411134489,building,house,regular
+415293296,highway,footway,regular
+423417336,building,house,regular
+431705514,building,house,regular
