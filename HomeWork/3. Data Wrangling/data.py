@@ -236,7 +236,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
 
                     else:
                         tag['value'] = "NaN"
-                    #print "\nNode street: {0}".format(tag['value'])
+                    print "\nNode street: {0}".format(tag['value'])
 
                     try:
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
@@ -249,7 +249,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                 elif is_postcode(tag_node):
                     tag['id'] = element.attrib['id']
                     tag['value'] = update_wrong_postcode(tag_node.attrib['v'])
-                    #print "\tNode postcode: {0}".format(tag['value'])
+                    print "\tNode postcode: {0}".format(tag['value'])
 
                     try:
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
@@ -313,7 +313,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
 
                     else:
                         tag['value'] = "NaN"
-                    #print "\nWay street: {0}".format(tag['value'])
+                    print "\nWay street: {0}".format(tag['value'])
                     
                     if LOWER_COLON.search(tag_k):
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
@@ -326,7 +326,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                 elif is_postcode(way_node):
                     tag['id'] = element.attrib['id']
                     tag['value'] = update_wrong_postcode(way_node.attrib['v'])
-                    #print "\tWay street: {0}".format(tag['value'])
+                    print "\tWay street: {0}".format(tag['value'])
                     
                     if LOWER_COLON.search(tag_k):
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
@@ -335,12 +335,6 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     else:
                         tag['key'] = way_node.attrib['k']
                         tag['type'] = 'regular'
-
-                else:
-                    tag_tag['id'] = element.attrib['id']
-                    tag_tag['key'] = way_node.attrib['k']
-                    tag_tag['value'] = way_node.attrib['v']
-                    tag_tag['type'] = 'regular'
 
                 '''
                 elif LOWER_COLON.search(tag_k):
