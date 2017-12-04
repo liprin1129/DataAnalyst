@@ -60,6 +60,10 @@
       </MacroExpansion>
       <CommandLineArguments>
          <CommandLineArgument
+            argument = "$(SRCROOT)/sql_test.py"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
             argument = "$(SRCROOT)/CSV2SQLDatabase.py"
             isEnabled = "YES">
          </CommandLineArgument>
