@@ -169,8 +169,8 @@ import cerberus
 
 import schema
 
-#OSM_PATH = "data/Sheffield/sample.osm"
-OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
+OSM_PATH = "data/Sheffield/sample.osm"
+#OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
 
 NODES_PATH = "nodes.csv"
 NODE_TAGS_PATH = "nodes_tags.csv"
