@@ -241,6 +241,8 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             try:
                 way_attribs[field] = element.attrib[field]
             except:
+                print "Fiead: ", field
+                print element.attrib[field]
                 way_attribs[field] = None
         #print way_attribs
 
@@ -280,7 +282,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     #print tag_tag
                     tags.append(tag_tag)
 
-        print tags
+#        print tags
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
 
 

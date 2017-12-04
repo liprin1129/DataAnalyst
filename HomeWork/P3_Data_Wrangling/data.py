@@ -154,8 +154,8 @@ The final return value for a "way" element should look something like:
                'value': '366409'}]}
 """
 
-from problematic_street_name import audit_type, audit_street_type, is_street_name
-from problematic_postcode import audit_wrong_postcode
+from problematic_street_name import audit_street_type_for_data_py, is_street_name
+from problematic_postcode import update_wrong_postcode, is_postcode
 from collections import defaultdict
 from tqdm import tqdm
 
@@ -169,9 +169,8 @@ import cerberus
 
 import schema
 
-#OSM_PATH = "example.osm"
-#OSM_PATH = "data/Sheffield/sample.osm"
-OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
+OSM_PATH = "data/Sheffield/sample.osm"
+#OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
 
 NODES_PATH = "nodes.csv"
 NODE_TAGS_PATH = "nodes_tags.csv"
@@ -224,18 +223,54 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             tag_k = tag_node.attrib['k']
 
             if not problem_chars.search(tag_k):
+                    
                 tag = {}
-                tag['id'] = element.attrib['id']
-                tag['value'] = tag_node.attrib['v']
+
+                if is_street_name(tag_node):
+                    street_name = tag_node.attrib['v']
+
+                    tag['id'] = element.attrib['id']
+                    street_name = audit_street_type_for_data_py(street_name)
+                    if street_name:
+                        tag['value'] = street_name
+
+                    else:
+                        tag['value'] = "NaN"
+                    #print "\nNode street: {0}".format(tag['value'])
+
+                    try:
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag['key'] = key_value[0][1]
+                        tag['type'] = key_value[0][0]
+                    except:
+                        tag['key'] = tag_node.attrib['k']
+                        tag['type'] = 'regular'
+
+                elif is_postcode(tag_node):
+                    tag['id'] = element.attrib['id']
+                    tag['value'] = update_wrong_postcode(tag_node.attrib['v'])
+                    #print "\tNode postcode: {0}".format(tag['value'])
+
+                    try:
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag['key'] = key_value[0][1]
+                        tag['type'] = key_value[0][0]
+                    except:
+                        tag['key'] = tag_node.attrib['k']
+                        tag['type'] = 'regular'
+                    
+                else:
+                    tag['id'] = element.attrib['id']
+                    tag['value'] = tag_node.attrib['v']
                 
-                # divide key and value according to semi-colon
-                try:
-                    key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
-                    tag['key'] = key_value[0][1]
-                    tag['type'] = key_value[0][0]
-                except:
-                    tag['key'] = tag_node.attrib['k']
-                    tag['type'] = 'regular'
+                    # divide key and value according to semi-colon
+                    try:
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag['key'] = key_value[0][1]
+                        tag['type'] = key_value[0][0]
+                    except:
+                        tag['key'] = tag_node.attrib['k']
+                        tag['type'] = 'regular'
 
             tags.append(tag)
 
@@ -248,8 +283,10 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
             try:
                 way_attribs[field] = element.attrib[field]
             except:
+                #print "Field: ", field
+                #print element.attrib[field]
                 way_attribs[field] = None
-        #print way_attribs
+            #print way_attribs
 
         nd_idx, tag_idx = 0, 0
         for way_node in element:
@@ -268,25 +305,51 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                 tag_k = way_node.attrib['k']
                 #print tag_k
 
-                building = None
-                for tag in element.iter("tag"):
-                    if tag.attrib['k'] == 'building':
-                        building = tag.attrib['v']
-                        
-                for tag in element.iter("tag"):
-                    if is_street_name(tag):
-                        street = tag.attrib['v']
-                        street_type_flag = audit_street_type(street_types, street)
-                        postcode_flag = audit_wrong_postcode(postcode_name, element.attrib['id'], tag.attrib['v'], building)
-                            
-                        if street_type_flag or postcode_flag == True:
-                            element.clear()
-                                
-                        elif type(street_type_flag) == str:
-                            tag.attrib['v'] = returned_value
-                                
+                if is_street_name(way_node):
+                    street_name = way_node.attrib['v']
+                    
+                    tag_tag['id'] = element.attrib['id']
+                    street_name = audit_street_type_for_data_py(street_name)
+                    if street_name:
+                        tag_tag['value'] = street_name
 
-                if LOWER_COLON.search(tag_k):
+                    else:
+                        tag_tag['value'] = "NaN"
+                    #print "\nWay street: {0}".format(tag['value'])
+                    
+                    if LOWER_COLON.search(tag_k):
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag_tag['key'] = key_value[0][1]
+                        tag_tag['type'] = key_value[0][0]
+                    else:
+                        tag_tag['key'] = way_node.attrib['k']
+                        tag_tag['type'] = 'regular'
+                            
+                elif is_postcode(way_node):
+                    tag_tag['id'] = element.attrib['id']
+                    postcode = update_wrong_postcode(way_node.attrib['v'])
+                    if postcode:
+                        tag_tag['value'] = postcode
+                    else:
+                        tag_tag['value'] = "NaN"
+                    #print "\tWay street: {0}".format(tag['value'])
+                    
+                    if LOWER_COLON.search(tag_k):
+                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        tag_tag['key'] = key_value[0][1]
+                        tag_tag['type'] = key_value[0][0]
+                    else:
+                        tag_tag['key'] = way_node.attrib['k']
+                        tag_tag['type'] = 'regular'
+
+                else:
+                    tag_tag['id'] = element.attrib['id']
+                    tag_tag['key'] = way_node.attrib['k']
+                    tag_tag['value'] = way_node.attrib['v']
+                    tag_tag['type'] = 'regular'
+
+                '''
+                elif LOWER_COLON.search(tag_k):
                     key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
 
                     tag_tag['id'] = element.attrib['id']
@@ -296,15 +359,16 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
 
                     #print tag_tag
                     tags.append(tag_tag)
+
                 else:
                     tag_tag['id'] = element.attrib['id']
                     tag_tag['key'] = way_node.attrib['k']
                     tag_tag['value'] = way_node.attrib['v']
                     tag_tag['type'] = 'regular'
-
+                '''
                     #print tag_tag
-                    tags.append(tag_tag)
-
+                tags.append(tag_tag)
+        #print(tags)
         #print tags
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
 
@@ -373,9 +437,6 @@ def process_map(file_in, validate):
 
         validator = cerberus.Validator()
         
-        street_types = defaultdict(set) ######For Auditing Check#######
-        postcode_name = defaultdict(set) ######For Auditing Check#######
-        
         for element in tqdm(get_element(file_in, tags=('node', 'way'))):
             el = shape_element(element)
             if el:
@@ -383,34 +444,13 @@ def process_map(file_in, validate):
                     validate_element(el, validator)
 
                 if element.tag == 'node':
-                    
-                    building = None
-                    for tag in element.iter("tag"):
-                        if tag.attrib['k'] == 'building':
-                            building = tag.attrib['v']
-                                
-                    for tag in element.iter("tag"):
-                        if is_street_name(tag):
-                            street = tag.attrib['v']
-                            street_type_flag = audit_street_type(street_types, street)
-                            postcode_flag = audit_wrong_postcode(postcode_name, element.attrib['id'], tag.attrib['v'], building)
-                            
-                            if street_type_flag or postcode_flag == True:
-                                    element.clear()
-                            
-                            elif type(street_type_flag) == str:
-                                tag.attrib['v'] = returned_value
-                                
                     nodes_writer.writerow(el['node'])
                     node_tags_writer.writerows(el['node_tags'])
                         
                 elif element.tag == 'way':
-                                
                     ways_writer.writerow(el['way'])
                     way_nodes_writer.writerows(el['way_nodes'])
                     way_tags_writer.writerows(el['way_tags'])
-        print "street types error: ", street_types
-        print "postcode error: ", street_types
 
 if __name__ == '__main__':
     # Note: Validation is ~ 10X slower. For the project consider using a small

@@ -195,7 +195,6 @@ def audit_type(osmfile):
     osm_file = open(osmfile, "r")
     street_types = defaultdict(set)
     for event, elem in tqdm(ET.iterparse(osm_file, events=("start",))):
-
         if elem.tag == "node" or elem.tag == "way":
             for tag in elem.iter("tag"):
                 if is_street_name(tag):
@@ -239,7 +238,7 @@ def update_type(name, mapping):
     
     wrong_name_obj = street_type_compiler.search(name)
     wrong_name_str = wrong_name_obj.group()
-    pprint.pprint(wrong_name_str)
+    #pprint.pprint(wrong_name_str)
     
     #pprint.pprint(street_type_compiler.sub('Avenue', name)) # example
     #pprint.pprint(street_type_compiler.sub(mapping[wrong_name_str], name))

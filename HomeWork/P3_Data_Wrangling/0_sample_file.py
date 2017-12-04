@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET  # Use cElementTree or lxml if too slow
 from tqdm import tqdm
 
 FORDER_PATH = "data/Sheffield/"
-OSM_FILE = "ex_S1C26jUbkHMaYxNLf4RAcdFsdc4vy.osm"  # Replace this with your osm file
+OSM_FILE = "Sheffield_data.osm"  # Replace this with your osm file
 SAMPLE_FILE = "sample.osm"
 
 k = 3000 # Parameter: take every k-th top level element
