@@ -353,6 +353,7 @@ def process_map(file_in, validate):
             el = shape_element(element)
             if el:
                 if validate is True:
+                    print el
                     validate_element(el, validator)
 
                 if element.tag == 'node':

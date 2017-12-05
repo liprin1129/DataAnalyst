@@ -303,7 +303,7 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                 #print tag_k
 
                 if is_street_name(way_node):
-                    street_name = street_type_for_data_py(way_node.attrib['v'])
+                    street_name = audit_street_type_for_data_py(way_node.attrib['v'])
                     if street_name:
                         #street_name = way_node.attrib['v']
                     
@@ -424,6 +424,7 @@ def process_map(file_in, validate):
             el = shape_element(element)
             if el:
                 if validate is True:
+                    print el
                     validate_element(el, validator)
 
                 if element.tag == 'node':
