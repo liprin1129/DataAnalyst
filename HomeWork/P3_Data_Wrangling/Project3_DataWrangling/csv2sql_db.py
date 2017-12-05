@@ -3,6 +3,8 @@ import csv
 import os
 os.chdir(r'/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/HomeWork/P3_Data_Wrangling/Project3_DataWrangling/')
 
+from tqdm import tqdm
+
 """
     Create a connection of database to the SQLite database
     """
@@ -27,8 +29,8 @@ def create_table(sql_connection, sql_command):
     try:
         cursor = sql_connection.cursor()
         cursor.execute(sql_command)
-    except Error:
-        print "Error: ", Error
+    except ValueError:
+        print "Error: ", ValueError
 
 # conn.commit
 
@@ -56,11 +58,18 @@ create_table(sql_connection, """
     """)
 
 with sql_connection:
-    with open("data/csv/nodes.csv", "r", encoding = "utf-8") as node_csv:
-        node_dict = csv.DictReader(node_csv)
-        for row in tqdm(node_dict):
-            sql_command = "INSERT INTO nodes(id, lat, lon, user, uid, version, changeset, timestamp) VALUES (?,?,?,?,?,?,?,?);"
-            insert_data = (row["id"], row["lat"], row["lon"], row["user"], row["uid"], row["version"], row["changeset"], row["timestamp"])
-            
-            insert_data_to_table(sql_connection, sql_command, insert_data)
+    '''
+    with open("data/csv/nodes.csv", "r") as node_csv:
+        #node_dict = csv.DictReader(node_csv)
+        node_dict = csv.reader(node_csv)
+    '''
+    import pandas
+    df = pandas.read_csv("data/csv/nodes.csv")
+    df.to_sql("nodes", sql_connection, if_exists='append', index=False)
+    '''
+        sql_command = "INSERT INTO nodes(id, lat, lon, user, uid, version, changeset, timestamp) VALUES (?,?,?,?,?,?,?,?);"
+        insert_data = (row["id"], row["lat"], row["lon"], row["user"], row["uid"], row["version"], row["changeset"], row["timestamp"])
+        
+        insert_data_to_table(sql_connection, sql_command, insert_data)
 
+    '''

@@ -9,7 +9,6 @@
 /* Begin PBXFileReference section */
 		CB20019C1FD57AE000780181 /* sql_test.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = sql_test.py; sourceTree = "<group>"; };
 		CB20019D1FD57CC800780181 /* csv2sql_db.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = csv2sql_db.py; sourceTree = "<group>"; };
-		CB6469D61FD3BB9E00D3C660 /* nodes.csv */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = nodes.csv; sourceTree = "<group>"; };
 		CBCC3ED01FD303D300B9C901 /* CSV2SQLDatabase_origin.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = CSV2SQLDatabase_origin.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -19,7 +18,6 @@
 			children = (
 				CB20019C1FD57AE000780181 /* sql_test.py */,
 				CB20019D1FD57CC800780181 /* csv2sql_db.py */,
-				CB6469D61FD3BB9E00D3C660 /* nodes.csv */,
 				CBCC3ED01FD303D300B9C901 /* CSV2SQLDatabase_origin.py */,
 			);
 			sourceTree = "<group>";
