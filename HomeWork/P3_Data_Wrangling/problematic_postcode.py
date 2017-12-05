@@ -51,7 +51,7 @@ def update_wrong_postcode(postcode):
     elif m4:
         return postcode
     else:
-        return "NaN"
+        return
     '''
     if not (m1 or m2 or m3 or m4):
         return True
