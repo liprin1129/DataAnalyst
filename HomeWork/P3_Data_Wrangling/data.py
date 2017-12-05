@@ -169,8 +169,8 @@ import cerberus
 
 import schema
 
-OSM_PATH = "data/Sheffield/sample.osm"
-#OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
+#OSM_PATH = "data/Sheffield/sample.osm"
+OSM_PATH = 'data/Sheffield/Sheffield_data.osm'
 
 NODES_PATH = "nodes.csv"
 NODE_TAGS_PATH = "nodes_tags.csv"
@@ -230,12 +230,15 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     street_name = tag_node.attrib['v']
 
                     tag['id'] = element.attrib['id']
+                    tag['value'] = audit_street_type_for_data_py(street_name)
+                    '''
                     street_name = audit_street_type_for_data_py(street_name)
                     if street_name:
                         tag['value'] = street_name
 
                     else:
                         tag['value'] = "NaN"
+                    '''
                     #print "\nNode street: {0}".format(tag['value'])
 
                     try:
@@ -245,24 +248,28 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     except:
                         tag['key'] = tag_node.attrib['k']
                         tag['type'] = 'regular'
+                    tags.append(tag)
 
                 elif is_postcode(tag_node):
-                    tag['id'] = element.attrib['id']
-                    tag['value'] = update_wrong_postcode(tag_node.attrib['v'])
-                    #print "\tNode postcode: {0}".format(tag['value'])
-
-                    try:
-                        key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
-                        tag['key'] = key_value[0][1]
-                        tag['type'] = key_value[0][0]
-                    except:
-                        tag['key'] = tag_node.attrib['k']
-                        tag['type'] = 'regular'
+                    postcode = update_wrong_postcode(tag_node.attrib['v'])
+                    if postcode:
+                        tag['id'] = element.attrib['id']
+                        tag['value'] = postcode #update_wrong_postcode(tag_node.attrib['v'])
+                        #print "\tNode postcode: {0}".format(tag['value'])
                     
+                        try:
+                            key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                            tag['key'] = key_value[0][1]
+                            tag['type'] = key_value[0][0]
+                        except:
+                            tag['key'] = tag_node.attrib['k']
+                            tag['type'] = 'regular'
+                    tags.append(tag)
+                            
                 else:
                     tag['id'] = element.attrib['id']
                     tag['value'] = tag_node.attrib['v']
-                
+                    
                     # divide key and value according to semi-colon
                     try:
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
@@ -271,8 +278,9 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     except:
                         tag['key'] = tag_node.attrib['k']
                         tag['type'] = 'regular'
+                    tags.append(tag)
 
-            tags.append(tag)
+            #tags.append(tag)
 
         #print node_attribs, tags, '\n'
         return {'node': node_attribs, 'node_tags': tags}
@@ -309,12 +317,15 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     street_name = way_node.attrib['v']
                     
                     tag_tag['id'] = element.attrib['id']
+                    tag_tag['value'] = audit_street_type_for_data_py(street_name)
+                    '''
                     street_name = audit_street_type_for_data_py(street_name)
                     if street_name:
                         tag_tag['value'] = street_name
 
                     else:
                         tag_tag['value'] = "NaN"
+                    '''
                     #print "\nWay street: {0}".format(tag['value'])
                     
                     if LOWER_COLON.search(tag_k):
@@ -324,50 +335,53 @@ def shape_element(element, node_attr_fields=NODE_FIELDS, way_attr_fields=WAY_FIE
                     else:
                         tag_tag['key'] = way_node.attrib['k']
                         tag_tag['type'] = 'regular'
+                    tags.append(tag_tag)
                             
                 elif is_postcode(way_node):
-                    tag_tag['id'] = element.attrib['id']
                     postcode = update_wrong_postcode(way_node.attrib['v'])
                     if postcode:
+
+                        tag_tag['id'] = element.attrib['id']
+                        postcode = update_wrong_postcode(way_node.attrib['v'])
+
                         tag_tag['value'] = postcode
-                    else:
-                        tag_tag['value'] = "NaN"
-                    #print "\tWay street: {0}".format(tag['value'])
+                                                    
+                        if LOWER_COLON.search(tag_k):
+                            key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                            tag_tag['key'] = key_value[0][1]
+                            tag_tag['type'] = key_value[0][0]
+                        else:
+                            tag_tag['key'] = way_node.attrib['k']
+                            tag_tag['type'] = 'regular'
+
+                        tags.append(tag_tag)
+                else:
+                    # TODO:
+                    tag_tag['id'] = element.attrib['id']
+                    tag_tag['key'] = way_node.attrib['k']
+                    tag_tag['value'] = way_node.attrib['v']
+                    tag_tag['type'] = 'regular'
                     
-                    if LOWER_COLON.search(tag_k):
+                    '''
+                        elif LOWER_COLON.search(tag_k):
                         key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+                        
+                        tag_tag['id'] = element.attrib['id']
                         tag_tag['key'] = key_value[0][1]
                         tag_tag['type'] = key_value[0][0]
-                    else:
+                        tag_tag['value'] = way_node.attrib['v']
+                        
+                        #print tag_tag
+                        tags.append(tag_tag)
+                        
+                        else:
+                        tag_tag['id'] = element.attrib['id']
                         tag_tag['key'] = way_node.attrib['k']
+                        tag_tag['value'] = way_node.attrib['v']
                         tag_tag['type'] = 'regular'
-
-                else:
-                    tag_tag['id'] = element.attrib['id']
-                    tag_tag['key'] = way_node.attrib['k']
-                    tag_tag['value'] = way_node.attrib['v']
-                    tag_tag['type'] = 'regular'
-
-                '''
-                elif LOWER_COLON.search(tag_k):
-                    key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
-
-                    tag_tag['id'] = element.attrib['id']
-                    tag_tag['key'] = key_value[0][1]
-                    tag_tag['type'] = key_value[0][0]
-                    tag_tag['value'] = way_node.attrib['v']
-
+                    '''
                     #print tag_tag
                     tags.append(tag_tag)
-
-                else:
-                    tag_tag['id'] = element.attrib['id']
-                    tag_tag['key'] = way_node.attrib['k']
-                    tag_tag['value'] = way_node.attrib['v']
-                    tag_tag['type'] = 'regular'
-                '''
-                    #print tag_tag
-                tags.append(tag_tag)
         #print(tags)
         #print tags
         return {'way': way_attribs, 'way_nodes': way_nodes, 'way_tags': tags}
