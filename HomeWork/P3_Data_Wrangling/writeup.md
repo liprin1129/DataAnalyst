@@ -306,7 +306,7 @@ In Sheffield, there are many unique road types which go beyond the given basic t
 	- Smithfield
 
 
-It problematic\_street\_name.py, I added the two lists (**unique** and **additional**) which refer unique road names and additional road types respectively, along side with the given expected road name list. I also made a list of names (removed) which are not in Sheffield or building names. Finally, I filled the **mapping** list to convert wrong street types and names to correct ones.
+In problematic\_street\_name.py, I added the two lists (**unique** and **additional**) which refer unique road names and additional road types respectively, along side with the given expected road name list. I also made a list of names (removed) which are not in Sheffield or building names. Finally, I filled the **mapping** list to convert wrong street types and names to correct ones.
 
 #### 2.2. Problems in postal code
 
@@ -330,6 +330,61 @@ S6 | 107368123, 107368125
 S9 5 | 106300879
 
 There is no way to correct those postal codes, unless I visit there and identify whether the postal codes are correct or not personally. Therefore, I removed the ids above containing wrong postal codes just for data's completeness.
+
+#### 2.3. Data cleaning
+
+Based on the problems audited above, I cleaned and corrected the dataset. For problamatic street name, I removed the street names which are not in Sheffield, so they have **None** value in their node. Then I modified wrong street name and street type. Finally, duplicated street type is also deleted.
+
+```Python
+def audit_street_type(street_types, street_name):
+    m = street_type_re.search(street_name)
+    if m:
+        street_type = m.group()
+        if street_name in unique:
+            return False
+        
+        elif (street_name in removed):
+            #print(True, street_type,":", street_name)
+            return True
+        
+        elif street_name in mapping_name.keys():
+            return update_name(street_name, mapping_name)
+        
+        elif street_type in mapping_type.keys():
+            return update_type(street_name, mapping_type)
+        
+        elif ((street_type not in expected ) and 
+             (street_type not in additional)):
+             street_types[street_type].add(street_name)
+             return False
+```
+Next, using the same method as cleaning problamatic street name, posecode were removed if they are incorrect.
+
+```Python
+def update_wrong_postcode(postcode):
+    postcode_re1 = re.compile(r'^\w\d\s\d\w{2}$', re.IGNORECASE)
+    postcode_re2 = re.compile(r'^\w\d\d+\s\d\w{2}$', re.IGNORECASE)
+    postcode_re3 = re.compile(r'^\w\d\s\d\d\w{2}$', re.IGNORECASE)
+    postcode_re4 = re.compile(r'^\w\d\d\s\d\d\w{2}$', re.IGNORECASE)
+    
+    m1 = postcode_re1.search(postcode)
+    m2 = postcode_re2.search(postcode)
+    m3 = postcode_re3.search(postcode)
+    m4 = postcode_re4.search(postcode)
+
+    if m1:
+        return postcode
+    elif m2:
+        return postcode
+    elif m3:
+        return postcode
+    elif m4:
+        return postcode
+    else:
+        return
+```
+## 3. Save Dataset to SQL Database
+
 
 <!-------------->
 <!-- Template -->
