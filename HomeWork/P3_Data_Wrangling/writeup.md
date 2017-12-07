@@ -1,10 +1,6 @@
 # OpenStreetMap Data Case Study
 
-### Map Area
-Izumo, Shimane, Japan
-- [https://www.openstreetmap.org/relation/4088005#map=10/35.5216/132.7849](https://www.openstreetmap.org/relation/4088005#map=10/35.5216/132.7849)
-
-I investigated an area where I am living in, and do some basic data wrangling tasks according to the steps below,
+I investigated Sheffield in the UK where I am familiar with, and do some basic data wrangling tasks according to the steps below,
 
 1. query database
 2. audit the data
@@ -19,14 +15,14 @@ For the first data audit task, '1\_unique\_tags.py' counts the number of unique 
 
 Name | Count
 ------------ | -------------
-node          | 1082390
-nd              | 1395801
-bounds      | 1
-member      | 23781
-tag              | 431569
-relation        | 2196
-way             | 174004
-osm            | 1
+node         | 1082390
+nd           | 1395801
+bounds       | 1
+member       | 23781
+tag          | 431569
+relation     | 2196
+way          | 174004
+osm          | 1
 
 **node**, **nd**, **member**, **tag**, **relation**, and **way** seem having resoanable number of counts. 
 
@@ -109,117 +105,6 @@ naptan:PlusbusZoneRef: 3660 | ref: 141                  | natural: 2794
 created_by: 2983            | building: 80              | maxspeed: 2784
 ...                         | ...                       | ...
 
-<!--
-	```Python
-	<< node >>
-	highway: 7767
-	name: 6184
-	source: 5742
-	naptan:Street: 3800
-	naptan:AtcoCode: 3793
-	naptan:Landmark: 3771
-	naptan:verified: 3760
-	naptan:Indicator: 3749
-	naptan:CommonName: 3742
-	naptan:Bearing: 3729
-	naptan:PlusbusZoneRef: 3660
-	created_by: 2983
-	amenity: 2408
-	alt_name: 1739
-	naptan:AltCommonName: 1684
-	barrier: 1679
-	addr:housenumber: 1575
-	shop: 662
-	power: 653
-	crossing: 611
-	addr:street: 562
-	ref: 481
-	ele: 438
-	foot: 415
-	traffic_calming: 405
-	natural: 402
-    bicycle: 342
-	.
-	.
-	.
-	
-	<< relation >>
-	type: 2111
-	name: 1661
-	source: 1514
-	site: 1460
-	naptan:verified: 1448
-	naptan:StopAreaCode: 1445
-	naptan:StopAreaType: 1443
-	restriction: 206
-	route: 169
-	operator: 144
-	ref: 141
-	building: 80
-	boundary: 49
-	network: 41
-	landuse: 40
-	admin_level: 37
-	natural: 29
-	website: 24
-	to: 20
-	public_transport:version: 20
-	from: 20
-	wikidata: 16
-	highway: 16
-	amenity: 15
-	addr:street: 15
-	wikipedia: 13
-	addr:postcode: 13
-	service: 11
-	except: 11
-	designation: 11
-	addr:housenumber: 10
-	.
-	.
-	.
-	
-	<< way >>
-	building: 112076
-	source: 92744
-	highway: 38054
-	name: 20406
-	landuse: 8769
-	addr:housenumber: 4076
-	barrier: 3709
-	surface: 3569
-	addr:street: 3099
-	oneway: 2958
-	natural: 2794
-	maxspeed: 2784
-	foot: 2728
-	amenity: 2353
-	service: 2180
-	ref: 2023
-	lit: 2011
-	postal_code: 1577
-	addr:postcode: 1469
-	access: 1221
-	railway: 1173
-	leisure: 1145
-	lanes: 1073
-	addr:city: 1050
-	layer: 923
-	bridge: 910
-	bicycle: 910
-	shop: 889
-	gauge: 855
-	electrified: 803
-	waterway: 785
-	tracks: 683
-	created_by: 668
-	source:name: 627
-	passenger: 567
-	.
-	.
-	.
-	```
--->
 Interestingly, there were no additional children tag in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information.
 
 **node**, **relation**, and **way** elements contain children nodes called tag, but they are not included in **member** and **nd** elements. In other words, there are no additional information in **member** and **nd** elements, while **node**, **tag**, and **relation** have many additional information conceived in sub-nodes, tag. Thus, I only focus the further audit tasks on those three elements.
@@ -232,18 +117,23 @@ In Sheffield, there are many unique road types which go beyond the given basic t
 - Building name: 
 	- Edmund Road Business Centre
 	- Fargate
+
 - Not in Sheffield:
 	- Riverside Park Industrial Estate
 	- Sheaf Gardens Industrial Estate
+
 - Abbrebiation: 
 	- rd -> Road
+
 - Not in Sheffield: 
 	- Waterthorpe Greenway is in Westfield
 	- Sheaf Gardens Industrial Estate in Middlesbrough
 	- Sheffield Digital Campus (no where)
+
 - duplicated:
 	- Barker's Pool and Barkers Pool
 	- Utah Terrace and Utah terrace
+
 - Wrong name: 
 	- Utah Terrace -> Utah Road
 	- Westgate -> West Street
@@ -252,7 +142,11 @@ In Sheffield, there are many unique road types which go beyond the given basic t
 	- Mount Pleasant Park -> Mount Pleasant Road
 	- Archer Road Retail Park -> Archer Road
 	- Victoria Villas -> Victoria Road or Victoria Street
+
 - Additional Road Type:
+	- Green
+	- East 
+	- North
 	- Green
 	- East
 	- North
@@ -278,6 +172,7 @@ In Sheffield, there are many unique road types which go beyond the given basic t
 	- Park
 	- Bank
 	- Lea
+
 - Unique Road Name:
 	- Crookes
 	- Backfields
@@ -333,7 +228,7 @@ There is no way to correct those postal codes, unless I visit there and identify
 
 #### 2.3. Data cleaning
 
-Based on the problems audited above, I cleaned and corrected the dataset. For problamatic street name, I removed the street names which are not in Sheffield, so they have **None** value in their node. Then I modified wrong street name and street type. Finally, duplicated street type is also deleted.
+Based on the problems audited above, I cleaned and corrected the dataset. For problamatic street name, I removed the street names which are not in Sheffield, so they have **None** value in their nodes. Then I modified wrong street name and street type. Finally, duplicated street type is also deleted. Below is the snip code for street name cleaning process.
 
 ```Python
 def audit_street_type(street_types, street_name):
@@ -358,7 +253,7 @@ def audit_street_type(street_types, street_name):
              street_types[street_type].add(street_name)
              return False
 ```
-Next, using the same method as cleaning problamatic street name, posecode were removed if they are incorrect.
+Next, posecodes were just removed if they are incorrect, because correcting those postcodes would take many efforts. Thus, for this project, it's better to just discard.
 
 ```Python
 def update_wrong_postcode(postcode):
@@ -383,8 +278,85 @@ def update_wrong_postcode(postcode):
     else:
         return
 ```
+
+The snip codes are in '5\_problematic\_street\_name.py' and '6\_problematic\_postcode.py' respectively. I said 'remove' and 'delete' data, but it actually doesn't mean 'remove child nodes'. I will explain it in detail in the next section.
+
 ## 3. Save Dataset to SQL Database
 
+#### Snip code explanation
+This is the task that I spent much time than other tasks. With the cleaning schemes above, I investigated each row which is given by *iterparse* function of *ElementTree* whether which is the problematic one. By iterating the whole dataset row by row, I could evade memory consumption issue compared to when I loaded whole dataset using *parse* function. 
+
+If a row is about street name or postcode, I checked and modified problematic ones if they are not those which have to be removed. Just not including them to tags dictionary which are to be converted to SQL database, I could actually discard (or neglect) them. 
+
+```Python
+if is_street_name(tag_node):
+	street_name = audit_street_type_for_data_py(tag_node.attrib['v'])
+	if street_name:
+		tag['id'] = element.attrib['id']
+		tag['value'] = street_name
+
+		try:
+			key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+			tag['key'] = key_value[0][1]
+			tag['type'] = key_value[0][0]
+		except:
+			tag['key'] = tag_node.attrib['k']
+			tag['type'] = 'regular'
+		tags.append(tag)
+
+elif is_postcode(tag_node):
+	postcode = update_wrong_postcode(tag_node.attrib['v'])
+	if postcode:
+		tag['id'] = element.attrib['id']
+		tag['value'] = postcode 
+	
+		try:
+			key_value = re.findall(r'([a-z]+):(.+$)', tag_k)
+			tag['key'] = key_value[0][1]
+			tag['type'] = key_value[0][0]
+		except:
+			tag['key'] = tag_node.attrib['k']
+			tag['type'] = 'regular'
+		tags.append(tag)
+```
+
+With the pure dataset, I firstly converted it into csv format and then finally to SQL database. It is in '7\_xml\_to\_csv.py', and '8\_csv2sql\_db.py', respectively.
+
+#### Data size
+This is an outline of file size though data wrangling and converting tasks.
+
+```
+Sheffield_data.osm .......... 240.5 MB
+                ⬇
+nodes_tags.csv .............. 3 MB
+nodes.csv ................... 89.7 MB
+ways_nodes.csv .............. 33.4 MB
+ways_tags.csv ............... 11.4 MB
+ways.csv .................... 10.5 MB
+                ⬇
+street_data.db .............. 134.8 MB
+```
+
+## 4. Explore Database
+
+#### Tables in database
+
+```sql
+sqlite> .tables
+node	node_tags	way	way_nodes	way_tags 
+```
+
+#### Total number of nodes
+```sql
+sqlite> SELECT COUNT(*) FROM node;
+1082172
+```
+
+#### Total number of ways
+```
+sqlite> SELECT COUNT(*) FROM way;
+173982
+```
 
 <!-------------->
 <!-- Template -->

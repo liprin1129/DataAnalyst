@@ -27,10 +27,37 @@ def audit_wrong_postcode(postcode_list, changeset_id, postcode, building):
     m4 = postcode_re4.search(postcode)
 
     if not (m1 or m2 or m3 or m4) and building:
+        return True
         #print postcode
         postcode_list[postcode].add(changeset_id)
 
+def update_wrong_postcode(postcode):
+    postcode_re1 = re.compile(r'^\w\d\s\d\w{2}$', re.IGNORECASE)
+    postcode_re2 = re.compile(r'^\w\d\d+\s\d\w{2}$', re.IGNORECASE)
+    postcode_re3 = re.compile(r'^\w\d\s\d\d\w{2}$', re.IGNORECASE)
+    postcode_re4 = re.compile(r'^\w\d\d\s\d\d\w{2}$', re.IGNORECASE)
     
+    m1 = postcode_re1.search(postcode)
+    m2 = postcode_re2.search(postcode)
+    m3 = postcode_re3.search(postcode)
+    m4 = postcode_re4.search(postcode)
+
+    if m1:
+        return postcode
+    elif m2:
+        return postcode
+    elif m3:
+        return postcode
+    elif m4:
+        return postcode
+    else:
+        return
+    '''
+    if not (m1 or m2 or m3 or m4):
+        return True
+        #print postcode
+        #postcode_list[postcode].add(changeset_id)
+    '''
 def audit_postcode(file_in):
     postcode_name = defaultdict(set)
     
