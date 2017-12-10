@@ -353,9 +353,17 @@ sqlite> SELECT COUNT(*) FROM node;
 ```
 
 #### Total number of ways
-```
+```sql
 sqlite> SELECT COUNT(*) FROM way;
 173982
+```
+
+#### Top ten contributors
+```sql
+SELECT uid FROM node, count(uid) as c_uid
+   ...> GROUP BY uid
+   ...> ORDER BY c_uid DESC
+   ...> LIMIT 10;
 ```
 
 <!-------------->
