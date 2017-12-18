@@ -1,0 +1,53 @@
+---
+title: "Load Data"
+author: "Seongmuk Gang"
+date: "18 December 2017"
+output: pdf_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+## Set Wroking Directory
+setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
+
+## Import Libraries
+```{r import library}
+library(ggplot2)
+library(dplyr)
+```
+
+## Features of data
+I'm curious about why people take loans and what kinds of factors have effects on people to take a loan. There must be as well relationships between those factors, and it also must be hard to show clear correlations of such complex data. Therefore, I want to start Exploratory Data Analysis before I deeply dive into it.
+
+First of all, I loaded csv data to R dataframe, and searched a length and number of variables. There are 113,937 debtors with 81 factors in the data.
+
+```{r load csv}
+pld <- read.csv('prosperLoanData.csv')
+names(pld)
+dim(pld)
+```
+
+It's necessray to know about types of variables, whether they are continuous or discrete
+```{r}
+str(pld)
+```
+
+
+```{r}
+ggplot(data=pld,aes(LoanStatus))+geom_bar(color=I('black'),fill=I('#56B4E9'))
+```
+
