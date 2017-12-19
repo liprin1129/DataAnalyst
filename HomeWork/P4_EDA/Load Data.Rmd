@@ -22,7 +22,10 @@ plot(pressure)
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 
 ## Set Wroking Directory
-setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
+```{r}
+#setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
+setwd("/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/HomeWork/P4_EDA/")
+```
 
 ## Import Libraries
 ```{r import library}
@@ -41,13 +44,55 @@ names(pld)
 dim(pld)
 ```
 
-It's necessray to know about types of variables, whether they are continuous or discrete
+It's necessray to know about types of variables, as well as whether they are continuous or discrete.
 ```{r}
 str(pld)
 ```
 
+# Univariate Plots Section
+
+## Loan Status
+```{r univariate loan state}
+ggplot(data=pld,aes(LoanStatus))+stat_count()
+```
+Most of borrowers are currently paying their private loans. Following that, completed loan is the next most stat. Although many people pay back their loans completely, there are still more bollowers who are in bebt than who completed loans. 
 
 ```{r}
-ggplot(data=pld,aes(LoanStatus))+geom_bar(color=I('black'),fill=I('#56B4E9'))
+pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n())
 ```
+
+```{r}
+pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus != "Cancelled" & LoanStatus 
+         != "Completed" & LoanStatus != "Current")
+```
+
+```{r sum laon state}
+pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus != "Cancelled" & LoanStatus 
+         != "Completed" & LoanStatus != "Current", 
+         select = n) %>%
+  sum()
+```
+Sadly, many people are in trouble to pay back loans. 19282 people couln't repay on time; 11992 loans are charged-off and 5018 people are in default on their loan.
+
+```{r sum laon state}
+pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus != "Cancelled" & LoanStatus != "Completed" & 
+           LoanStatus != "Current" & LoanStatus != "Chargedoff" &
+           LoanStatus != "Defaulted" & LoanStatus != "FinalPaymentInProgress", 
+         select = n) %>%
+  sum()
+```
+2067 bollowers had late payments. 
+
+
 
