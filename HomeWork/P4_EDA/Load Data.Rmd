@@ -7,20 +7,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
-
 ## Set Wroking Directory
 ```{r}
 #setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
@@ -52,8 +38,12 @@ str(pld)
 # Univariate Plots Section
 
 ## Loan Status
+
 ```{r univariate loan state}
-ggplot(data=pld,aes(LoanStatus))+stat_count()
+ggplot(data=pld,aes(LoanStatus))+
+  stat_count()+
+  scale_y_sqrt()+
+  labs(y="sqrt count")
 ```
 Most of borrowers are currently paying their private loans. Following that, completed loan is the next most stat. Although many people pay back their loans completely, there are still more bollowers who are in bebt than who completed loans. 
 
@@ -72,18 +62,19 @@ pld %>%
 ```
 
 ```{r sum laon state}
-pld %>%
+pld$num_debtors <- pld %>%
   group_by(LoanStatus) %>%
   summarise(n=n()) %>%
-  subset(LoanStatus != "Cancelled" & LoanStatus 
-         != "Completed" & LoanStatus != "Current", 
+  subset(LoanStatus != "Cancelled" & LoanStatus != "Completed", 
          select = n) %>%
   sum()
+
+pld$num_debtors[1]
 ```
-Sadly, many people are in trouble to pay back loans. 19282 people couln't repay on time; 11992 loans are charged-off and 5018 people are in default on their loan.
+There are 75,858 debtors in total. Sadly, many people are in trouble to pay back loans. 19282 people couldn't repay on time; 11,992 loans are charged-off and 5,018 people are in default on their loan.
 
 ```{r sum laon state}
-pld %>%
+pld$delayed_payment <- pld %>%
   group_by(LoanStatus) %>%
   summarise(n=n()) %>%
   subset(LoanStatus != "Cancelled" & LoanStatus != "Completed" & 
@@ -91,8 +82,231 @@ pld %>%
            LoanStatus != "Defaulted" & LoanStatus != "FinalPaymentInProgress", 
          select = n) %>%
   sum()
+
+pld$delayed_payment[1]
 ```
 2067 bollowers had late payments. 
 
+2,067 people are not in urgent situation of default or charged-off, but still of credit decline possibility, because of delayed repayment.
 
+```{r sum Charged-off and Defaulted Debtors}
+pld$dangerous_debtors <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus == "Chargedoff" | LoanStatus == "Defaulted", 
+         select = n) %>%
+  sum()
+
+pld$good_debtors <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus == "Current", 
+         select = n) %>%
+  sum()
+
+pld$non_deptors <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus == "Completed" | LoanStatus == "Cancelled", select = n) %>%
+  sum()
+
+debt_or_no_df = data.frame(state = c("non_deptors", "num_debtors"),
+                value = c(pld$non_deptors[1], pld$num_debtors[1]))
+
+ggplot(aes(x = state, y = value/nrow(pld)*100), data = debt_or_no_df) + geom_bar(stat='identity') +
+  labs(y = "borrower state %")
+```
+
+I plotted above information using percentage scale for easy comparison. The number of eople who have no any loan is much smaller than the number of people holding loans.
+
+```{r}
+debt_stat_df = data.frame(state = c("good borrowers", "delayed payment", "dangerous debtors"),
+                value = c(pld$good_debtors[1], pld$delayed_payment[1], pld$dangerous_debtors[1]))
+
+ggplot(aes(x = state, y = value/nrow(pld)*100), data = debt_stat_df) + geom_bar(stat='identity') +
+  labs(y = "debt state %")
+```
+
+Among the people holding a loan, almost borrowers have no broblem in repaying their loan. Unfortunately, charged-off and defaulted case took about 18%.
+
+## Credit Grade
+```{r}
+#pr$ListingCreationDate <- as.Date(pr$ListingCreationDate, format = "%Y-%m-%d %H:%M:%S") 
+subset(pld, CreditGrade !="") %>%
+ggplot(aes(x = CreditGrade)) +
+  stat_count()
+```
+
+I ploted credit grade. There are a lot of no information which is populated after 2009, so I omitted it. Credit grade seems normally distributed, except lowest credit grade (HR) is slightly high. This plot shows something rediculous result, because loans were also admitted to HR and NC groups to which loans must not be allowed. 
+
+I could not easily conclude at this stage a reason that this led default and charged-off situation, but it might be one of the factor for that. Moreover, It can be suspected that why credit grade information wasn't recorded since 2009, becuase allowing loans for low credit grade people had done a lot and Prosper wanted to hide that.
+
+## Length of Loands
+```{r}
+pld$Term<-factor(pld$Term)
+
+ggplot(data=pld,aes(Term)) + 
+  geom_bar(color=I('black'),fill=I('#56B4E9'))
+```
+```{r}
+table(pld$Term)/nrow(pld)*100
+```
+
+There are three types of loan legth; 12 months, 36 months, and 60 months. 36 months loan is the most popular, 77.0%, followed by long term loan (60 months), 21.5%. 12 months loan had just a small portion, 1.4%.
+
+## Interest Rate
+```{r}
+ggplot(aes(x = BorrowerAPR), data = pld) +
+  geom_histogram(binwidth = 0.01, color = 'black', fill = '#56B4E9')
+```
+
+```{r}
+summary(pld$BorrowerAPR)
+```
+
+Borrower's APR seems uniformly distributed with bin width 0.01. Minimum rate was 0.007% and maximum rate was 0.5%, despite the peak on about 0.37 %.
+
+## The origination amount of the loan.
+```{r}
+ggplot(aes(x = LoanOriginalAmount), data = pld) +
+  geom_histogram(binwidth = 1000, color = 'black', fill = '#56B4E9')
+```
+
+Original amounts of loans looks like left-skewed with bin width 1000. However, there are some peaks in higher amounts. Probably they were the amount people mostly found. 
+
+이것과 대출 발생 시간. (두개의 변수)
+
+## The date the loan was originated.
+```{r}
+Sys.setenv(TZ="Asia/Tokyo")
+Sys.getenv("TZ")
+pld$LoanOriginationYear <- format(as.Date(pld$LoanOriginationDate, format = "%Y-%m-%d %H:%M:%S"), "%Y")
+
+ggplot(aes(x=LoanOriginationYear), data=pld)+
+  geom_bar()
+```
+
+왜 2013년이 가장 높은지 조사 하면 재밌겠다.
+
+## The scheduled monthly loan payment.
+
+```{r}
+summary(pld$MonthlyLoanPayment)
+
+ggplot(aes(x = MonthlyLoanPayment), data = pld) +
+  geom_histogram(binwidth = 50)
+```
+
+Monthly loan payment totally seems left skewed. However, this is not convincing, because I assumed if montly lond payment depends on the origination amount of the loan. The origination amount of the loan also had a lef skewed distribution, but it had some peaks.
+
+```{r}
+pld$caculatedMonthlyLoanPayment <- pld$LoanOriginalAmount / pld$Term
+pld$caculatedMonthlyLoanPayment <- pld$caculatedMonthlyLoanPayment + pld$caculatedMonthlyLoanPayment  * pld$BorrowerAPR
+ggplot(aes(caculatedMonthlyLoanPayment), data = pld) + geom_histogram(binwidth = 40)
+```
+
+So, I invested more in detail by calculating montly loan payment using original loan amount and terms of when loans were bonded. Rough equation is like this; $ \frac{\text{Original Amount} }{\text{Term}} + \text{Original Amount} \times \text{APR} $. After plotting the result of the equation, the shape of histogram doesn't identical with MonthlyLoanPayment variable, but looks simlar. Therefore, even though there are some peaks on original loan amount, montly loan payment has left skewed distribution because it is related to APR.
+
+## Monthly Imcome
+```{r}
+summary(pld$StatedMonthlyIncome)
+
+ggplot(aes(StatedMonthlyIncome), data=pld) +
+  geom_histogram(binwidth = 5000, color = 'black', fill = '#56B4E9')
+  #geom_histogram(binwidth=500, color=I('black'), fill=I("#F79420") )
+  #xlim(0,10000)
+```
+
+Monthly imcome seems to have tremendous outliers. From the histogram above with 5000\$ binwidth, most borrowers have sararies below than 250000\$. 
+
+```{r}
+ggplot(aes(x = "All Borrwers", y = StatedMonthlyIncome), data=pld) +
+  geom_boxplot() +
+  labs(x = "")
+```
+
+Furthermore, To identify outliers, I used boxplot. There is a huge gap between the largest outlier and within IQR. The largest outlier is about 2 million dolloars.
+
+To see in detail, I cut the x axis up to 25000\$.
+
+```{r}
+ggplot(aes(x = "All Borrwers", y = StatedMonthlyIncome), data=pld) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = c(0, 25000)) +
+  labs(x = "")
+```
+
+Mean looks like below than 5000.
+
+```{r}
+ggplot(aes(StatedMonthlyIncome), data=pld) +
+  geom_histogram(binwidth = 500, color = 'black', fill = '#56B4E9') +
+  xlim(0,25000)
+```
+
+Obviously, it has left-skewed shape. 
+
+If I cut the x axis up to 8000\$, I can see the first and third quantiles, which are about 7000 and 3000 respectively.
+
+```{r}
+ggplot(aes(x = "All Borrwers", y = StatedMonthlyIncome), data=pld) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = c(0, 8000)) +
+  labs(x = "")
+```
+
+
+```{r}
+ggplot(aes(StatedMonthlyIncome), data=pld) +
+  geom_histogram(binwidth = 500, color = 'black', fill = '#56B4E9') +
+  xlim(0,8000)
+```
+
+When I cut it by 10000 \$which has most data with 500\$ bin, it seems nomarly distributed. 
+
+## Home owner?
+
+```{r}
+ggplot(aes(x = IsBorrowerHomeowner), data = pld) +
+  geom_bar()
+```
+
+A number of house owners and tanents almost same, but the number of houseowners is slightly higher than the number of tanents.
+
+# Purpose of Loans
+```{r}
+ggplot(aes(x = ListingCategory..numeric.), data = pld) +
+  stat_count()
+```
+
+Purposes of loans have 20 categories, and each category was recored as a mumeric value, such as
+
+0 - Not Available
+1 - Debt Consolidation
+2 - Home Improvement
+3 - Business
+4 - Personal Loan
+5 - Student Use
+6 - Auto
+7- Other
+8 - Baby&Adoption
+9 - Boat
+10 - Cosmetic Procedure
+11 - Engagement Ring
+12 - Green Loans
+13 - Household Expenses
+14 - Large Purchases
+15 - Medical/Dental
+16 - Motorcycle
+17 - RV
+18 - Taxes
+19 - Vacation
+20 - Wedding Loans
+
+The most common reason was debt consolidation.
+
+# Bivariate Analytics
+```{r}
+
+```
 
