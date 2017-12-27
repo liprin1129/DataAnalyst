@@ -2,8 +2,10 @@
 title: "Load Data"
 author: "Seongmuk Gang"
 date: "18 December 2017"
-output: pdf_document
-editor_options: 
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
   chunk_output_type: console
 ---
 
@@ -73,7 +75,7 @@ pld$num_debtors[1]
 ```
 There are 75,858 debtors in total. Sadly, many people are in trouble to pay back loans. 19282 people couldn't repay on time; 11,992 loans are charged-off and 5,018 people are in default on their loan.
 
-```{r sum laon state}
+```{r sum laon state2}
 pld$delayed_payment <- pld %>%
   group_by(LoanStatus) %>%
   summarise(n=n()) %>%
@@ -200,7 +202,7 @@ ggplot(aes(x = MonthlyLoanPayment), data = pld) +
 Monthly loan payment totally seems left skewed. However, this is not convincing, because I assumed if montly lond payment depends on the origination amount of the loan. The origination amount of the loan also had a lef skewed distribution, but it had some peaks.
 
 ```{r}
-pld$caculatedMonthlyLoanPayment <- pld$LoanOriginalAmount / pld$Term
+pld$caculatedMonthlyLoanPayment <- as.numeric(pld$LoanOriginalAmount) / (as.numeric(pld$Term)*12)
 pld$caculatedMonthlyLoanPayment <- pld$caculatedMonthlyLoanPayment + pld$caculatedMonthlyLoanPayment  * pld$BorrowerAPR
 ggplot(aes(caculatedMonthlyLoanPayment), data = pld) + geom_histogram(binwidth = 40)
 ```
@@ -305,8 +307,35 @@ Purposes of loans have 20 categories, and each category was recored as a mumeric
 
 The most common reason was debt consolidation.
 
-# Bivariate Analytics
-```{r}
+## Univariate Summary
+I shortly investigated some variables themselves which are about states of loans and of borrowers. Through this observation, the data showed meaningful for analytics but dangerous information for the individual borrowers. A large number of people were in charged-off or default situations. Also, borrowers didn't hold good credits when their loan started. Which means easy loan allowance drove into the bad situation for both company and borrowers.
 
+# Bivariate Analytics
+
+```{r}
+set.seed(1836)
+
+pld_subset <- subset(pld, select = c(LoanStatus, CreditGrade,Term, BorrowerAPR, LoanOriginalAmount, LoanOriginationYear, MonthlyLoanPayment, StatedMonthlyIncome, IsBorrowerHomeowner))
+
+names(pld_subset)
+
+ggpairs(pf_subset[sample.int(nrow(pf_subset), 100), ], axisLabels = 'internal')
+
+ggplot(aes(x = LoanStatus), data = pld) +
+  stat_count()+
+  facet_wrap(~na.omit(CreditGrade), ncol = 5)
+```
+
+```{r}
+#Let's select only the variables of interest.
+selected_vars <- c("BorrowerRate","DebtToIncomeRatio",
+                   "ProsperScore","CreditScoreRangeLower",
+                   "DelinquenciesLast7Years","LoanOriginalAmount",
+                   "MonthlyLoanPayment")
+
+pr_column_select <- pr[,selected_vars]
+pr_column_select<-na.omit(pr_column_select)
+
+ggpairs(pr_column_select)
 ```
 
