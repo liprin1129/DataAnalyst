@@ -11,8 +11,8 @@ editor_options:
 
 ## Set Wroking Directory
 ```{r}
-setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
-#setwd("/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/HomeWork/P4_EDA/")
+#setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
+setwd("/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/HomeWork/P4_EDA/")
 ```
 
 ## Import Libraries
@@ -340,8 +340,53 @@ ggplot(aes(x = LoanStatus), data = subset(pld, CreditGrade == "")) +
 
 And then I plotted loan status in terms of no credit grade. There are all loan statuses. It's unpredicted result, as I assumed credit grade is not national grade but only Prosper's internal grade in the first plot of LoanStatus in terms of CreditGrade variable. So, if it was the internal grade, there should not be cancelled, charged-off, completed, and defaulted statuses in no credit grade level of factor.
 
-Therefore, I may conclude CreditGrade variable cannot be used for further analytics.
+Therefore, I may conclude CreditGrade variable isn't reliable for further analytics.
 
+## Loan Status and Length of Loans
+```{r}
+ggplot(aes(x = LoanStatus), data = pld) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1)
+```
+
+36 and 60 terms of loans seem to have a similar aspect. Current is the largest number, followed by Completed status.
+
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, Term == "12")) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1)
+```
+
+In 12 term loans, most people completed paying back loans, and charged-off and current status competed for the second place.
+
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, Term == "36")) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1)
+```
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, Term == "60")) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1) +
+  scale_x_discrete(name ="Loan Status", limits=c("Cancelled", "Chargedoff", "Completed", "Current", "Defaulted", "Final", "1-15 days", ">120 days", "16-30 days", "31-60 days", "61-90 days", "91-120 days"))
+```
+In both 60 and 36 terms, most people are paying back their loans. However, there are big gap between Current and Completed status in 60 terms loan, although 36 terms loan has not much difference as it between Current and Completed Status.
+
+In summary, as terms of loans were shoter, the portion of Completed status were larger.
+
+## Loan Status and Amount of Loan
+
+```{r}
+pld$OriginalLoanAmount.bucket <- cut(pld$LoanOriginalAmount, breaks = c(1000, 5000, 10000, 15000, 20000,
+                                                                        25000, 30000, 35000))
+
+table(pld$OriginalLoanAmount.bucket)
+
+ggplot(aes(x = LoanStatus), data = pld) +
+  stat_count() +
+  facet_wrap(~OriginalLoanAmount.bucket, nrow = 2) + 
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank())
+```
 
 
 ```{r}
