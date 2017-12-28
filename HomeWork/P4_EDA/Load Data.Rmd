@@ -6,13 +6,13 @@ output:
   html_document: default
   pdf_document: default
 editor_options:
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ## Set Wroking Directory
 ```{r}
-#setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
-setwd("/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/HomeWork/P4_EDA/")
+setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
+#setwd("/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/HomeWork/P4_EDA/")
 ```
 
 ## Import Libraries
@@ -312,19 +312,37 @@ I shortly investigated some variables themselves which are about states of loans
 
 # Bivariate Analytics
 
+## Credit Grade and Loan Status
 ```{r}
-set.seed(1836)
+#set.seed(1836)
 
-pld_subset <- subset(pld, select = c(LoanStatus, CreditGrade,Term, BorrowerAPR, LoanOriginalAmount, LoanOriginationYear, MonthlyLoanPayment, StatedMonthlyIncome, IsBorrowerHomeowner))
+#pld_subset <- subset(pld, select = c(LoanStatus, CreditGrade,Term, BorrowerAPR, LoanOriginalAmount, LoanOriginationYear, MonthlyLoanPayment, StatedMonthlyIncome, IsBorrowerHomeowner))
 
-names(pld_subset)
+#names(pld_subset)
 
-ggpairs(pf_subset[sample.int(nrow(pf_subset), 100), ], axisLabels = 'internal')
+#ggpairs(pf_subset[sample.int(nrow(pf_subset), 100), ], axisLabels = 'internal')
 
-ggplot(aes(x = LoanStatus), data = pld) +
+#revalue(pld$LoanStatus, c("Cancelled" = "Cancelled", "Chargedoff" = "Chargedoff", "Completed" = "Completed", "Current" = "Current", "Defaulted" = "Defaulted", "Final" = "Final", "Past Due (1-15 days)" = "1-15 days", "Past Due (>120 days)" = ">120 days", "Past Due (16-30 days)" = "16-30 days", "Past Due (31-60 days)"= "31-60 days", "Past Due (61-90 days)" = "61-90 days", "Past Due (91-120 days)" ="91-120 days"))
+
+#pld$LoanStatus <- factor(pld$LoanStatus, levels = c("Cancelled", "Chargedoff", "Completed", "Current", "Defaulted", "Final", "1-15 days", ">120 days", "16-30 days", "31-60 days", "61-90 days", "91-120 days"))
+
+ggplot(aes(x = LoanStatus), data = subset(pld, CreditGrade !="")) +
   stat_count()+
-  facet_wrap(~na.omit(CreditGrade), ncol = 5)
+  facet_wrap(~CreditGrade, ncol = 2)
 ```
+
+I'm curious about how credit grades of borrowers have effects on their loan status. Because there are an level with no information in CreditGrade variable when I invested it in univariate session, I omitted it and plotted. Interestingly, people who have credit grade have only cancelled, charged-off, completed, and defaulted statuses. 
+
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, CreditGrade == "")) +
+  stat_count()
+```
+
+And then I plotted loan status in terms of no credit grade. There are all loan statuses. It's unpredicted result, as I assumed credit grade is not national grade but only Prosper's internal grade in the first plot of LoanStatus in terms of CreditGrade variable. So, if it was the internal grade, there should not be cancelled, charged-off, completed, and defaulted statuses in no credit grade level of factor.
+
+Therefore, I may conclude CreditGrade variable cannot be used for further analytics.
+
+
 
 ```{r}
 #Let's select only the variables of interest.
@@ -337,5 +355,38 @@ pr_column_select <- pr[,selected_vars]
 pr_column_select<-na.omit(pr_column_select)
 
 ggpairs(pr_column_select)
+```
+
+```{r}
+# Fake data
+y<- sample(10, 100, rep=T)
+x <- rnorm(100)
+
+# plots
+par(mfrow=c(2,3)) # open an object
+plot(x,y) # First plot
+title("Default plot")
+
+plot(x,y, axes = FALSE) # Second plot
+title("Without any axis")
+
+plot(x,y, axes = FALSE) # Third plot
+axis(1)
+title("X-axis added, but as is")
+
+plot(x,y, axes = FALSE) # Fourth plot
+axis(2)
+title("Y-axis added, but as is")
+
+yticks <- seq(5, 12, 1)
+plot(x,y, axes = FALSE) # Fifth plot
+axis(2, at = yticks, labels = yticks, col.axis="red", las=2)
+title("Manipulated Y-axis")
+
+xticks <- seq(0, 3, .5)
+plot(x,y, axes = FALSE) # Sixth plot
+axis(2, at = yticks, labels = yticks, col.axis="red", las=2)
+axis(1, at = xticks, labels = xticks, col.axis="blue", las=2, tck=-.01)
+title("Manipulated Y and X axes")
 ```
 
