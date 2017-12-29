@@ -388,6 +388,179 @@ ggplot(aes(x = LoanStatus), data = pld) +
   theme(axis.text.x = element_blank(), axis.text.y = element_blank())
 ```
 
+I grouped original loan amount into 8 groups by \$5000. Current status are dominant in almost groups. Only \$1000 ~ 5000 group has the largest height on Completed status. This result is the same as Loan Status and Length of Loans bar chart. Larger amount of original loan tended to have smaller repayment rate.
+
+## Loan Original Year and APR
+
+```{r}
+t <- subset(pld, LoanOriginationYear == '2006')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean <- data.frame("APR.06" = t)
+apr_mean$APR.06 <- t
+
+t <- subset(pld, LoanOriginationYear == '2007')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.07 <- t
+
+t <- subset(pld, LoanOriginationYear == '2008')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.08 <- t
+
+t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.09 <- t
+
+t <- subset(pld, LoanOriginationYear == '2010')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.10 <- t
+
+t <- subset(pld, LoanOriginationYear == '2011')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.11 <- t
+
+t <- subset(pld, LoanOriginationYear == '2012')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.12 <- t
+
+t <- subset(pld, LoanOriginationYear == '2013')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.13 <- t
+
+t <- subset(pld, LoanOriginationYear == '2014')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.14 <- t
+
+apr_mean <- data.frame(rows = row.names(apr_mean), stack(apr_mean))
+apr_mean$count <- as.numeric(table(subset(pld, LoanOriginationYear!="2005")$LoanOriginationYear))
+
+ggplot(apr_mean) +
+  geom_bar(aes(x = ind, y = count/50000), stat = "identity", color = 'black', fill = '#56B4E9') +
+  geom_line(aes(x = ind, y = as.numeric(values), group = 1), color = 'red') +
+  labs(y = 'APR')+
+  scale_y_continuous(sec.axis = sec_axis(~.*50000, name = "Originated Year Count"))
+```
+
+There would be various reason why much more people made a loan on 2013 than other years. I'm got to be curious about that. Firstly, I assumed low APR might lead that trend. 
+
+
+```{r}
+pld$LoanOriginationYearMonthDate <- substr(pld$LoanOriginationDate,0,10)
+group_by(pld, LoanOriginationYearMonthDate)
+
+for (i in a$LoanOriginationYearMonthDate) {
+  subset(a, LoanOriginationYearMonthDate == i)
+  }
+
+apr_06 <- table(subset(pld, LoanOriginationYear == '2006')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_06 <- table(subset(pld, LoanOriginationYear == '2006')$BorrowerAPR) %>%
+  as.vector()
+apr_mean <- data.frame("APR.16" = mean(apr_06*apr_count_06))
+
+apr_07 <- table(subset(pld, LoanOriginationYear == '2007')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_07 <- table(subset(pld, LoanOriginationYear == '2007')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.07 <- mean(apr_07*apr_count_07)
+
+apr_08 <- table(subset(pld, LoanOriginationYear == '2008')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_08 <- table(subset(pld, LoanOriginationYear == '2008')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.08 <- mean(apr_08*apr_count_08)
+
+apr_09 <- table(subset(pld, LoanOriginationYear == '2009')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_09 <- table(subset(pld, LoanOriginationYear == '2009')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.09 <- mean(apr_09*apr_count_09)
+
+apr_10 <- table(subset(pld, LoanOriginationYear == '2010')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_10 <- table(subset(pld, LoanOriginationYear == '2010')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.10 <- mean(apr_10*apr_count_10)
+
+apr_11 <- table(subset(pld, LoanOriginationYear == '2011')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_11 <- table(subset(pld, LoanOriginationYear == '2011')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.11 <- mean(apr_11*apr_count_11)
+
+apr_12 <- table(subset(pld, LoanOriginationYear == '2012')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_12 <- table(subset(pld, LoanOriginationYear == '2012')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.12 <- mean(apr_12*apr_count_12)
+
+apr_13 <- table(subset(pld, LoanOriginationYear == '2013')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_13 <- table(subset(pld, LoanOriginationYear == '2013')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.13 <- mean(apr_13*apr_count_13)
+
+apr_14 <- table(subset(pld, LoanOriginationYear == '2014')$BorrowerAPR) %>%
+  names() %>%
+  as.numeric()
+apr_count_14 <- table(subset(pld, LoanOriginationYear == '2014')$BorrowerAPR) %>%
+  as.vector()
+apr_mean$APR.14 <- mean(apr_14*apr_count_14)
+
+apr_mean <- data.frame(rows = row.names(apr_mean), stack(apr_mean))
+
+p <- ggplot(aes(x = BorrowerAPR), data = pld) +
+  geom_freqpoly(aes(colour = LoanOriginationYear), binwidth = 0.01)
+```
+
+```{r}
+#Let's create a variable that includes only month and year of the loan origination date
+pld$LoanOriginationYearMonthDate <- substr(pld$LoanOriginationDate,0,10)
+
+ggplot(pld,aes(yearmth_orig_date,fill=factor(Term))) + 
+      geom_bar( colour="darkgreen")
+```
+levels(factor(seq(1, 31, by=1)))
+```{r}
+# Summarize the data by yearmth_orig_date and Term
+# The metrics calculated by yearmth_orig_date and Term are
+# mean borrower rate, mean loan origination amount and 
+# mean monthly loan payment
+avg_rate_amt2 <- pld %>%
+  group_by(yearmth_orig_date,Term) %>%
+  summarise(
+    Rate_mean = mean(BorrowerRate, na.rm = TRUE),
+    LoanAmount_mean = mean(LoanOriginalAmount, na.rm = TRUE),
+    monthlypayment_mean = mean(MonthlyLoanPayment, na.rm = TRUE),
+    count_loan = n()
+  )
+
+p1 <- ggplot(data=avg_rate_amt2,
+            aes(x=yearmth_orig_date,y=count_loan,fill=Term)) + 
+            geom_bar(stat = "identity") 
+
+p2 <- ggplot(data=avg_rate_amt2,
+            aes(yearmth_orig_date,LoanAmount_mean)) +
+            geom_line(aes(colour=Term))
+
+grid.arrange(p1, p2, ncol=2)
+```
 
 ```{r}
 #Let's select only the variables of interest.
