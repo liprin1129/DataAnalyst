@@ -449,7 +449,102 @@ ggplot(apr_mean) +
   scale_y_continuous(sec.axis = sec_axis(~.*50000, name = "Originated Year Count"))
 ```
 
-There would be various reason why much more people made a loan on 2013 than other years. I'm got to be curious about that. Firstly, I assumed low APR might lead that trend. 
+There would be various reason why much more people made a loan on 2013 than other years. I got to be curious about that. Firstly, I assumed low APR might lead that trend, so inquiried APR rates which the most people used in each year. It looks like that after low APR year, people borrowed much money after that year. Especially, from 2010 to 2012, as APR increased, the number of people who used Prosper also goes high. However, it doesn't says 2013's biggest increase. 
+
+```{r}
+t <- subset(pld, LoanOriginationYear == '2006')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean <- data.frame("APR.06" = t)
+#apr_mean$LOW.APR.06 <- t
+
+t <- subset(pld, LoanOriginationYear == '2007')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.07 <- t
+
+t <- subset(pld, LoanOriginationYear == '2008')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.08 <- t
+
+t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.09 <- t
+
+t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.09 <- t
+
+t <- subset(pld, LoanOriginationYear == '2010')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.10 <- t
+
+t <- subset(pld, LoanOriginationYear == '2011')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.11 <- t
+
+t <- subset(pld, LoanOriginationYear == '2012')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.12 <- t
+
+t <- subset(pld, LoanOriginationYear == '2013')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.13 <- t
+
+t <- subset(pld, LoanOriginationYear == '2014')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_mean$LOW.APR.14 <- t
+
+apr_mean <- data.frame(rows = row.names(apr_mean), stack(apr_mean))
+apr_mean$count <- as.numeric(table(subset(pld, LoanOriginationYear!="2005")$LoanOriginationYear))
+
+ggplot(apr_mean) +
+  geom_bar(aes(x = ind, y = count/500000), stat = "identity", color = 'black', fill = '#56B4E9') +
+  geom_line(aes(x = ind, y = as.numeric(values), group = 1), color = 'red') +
+  labs(y = 'APR')+
+  scale_y_continuous(sec.axis = sec_axis(~.*500000, name = "Originated Year Count"))
+```
+
+Then, I searched the lowest APR rate of each year. 
+
+```{r}
+require(dplyr)
+ListingCategory <- data.frame(c('Not Available', 'Debt Consolidation', 'Home Improvement', 'Business', 'Personal Loan', 'Student Use', 'Auto', 'Other', 'Baby&Adoption', 'Boat', 'Cosmetic Procedure', 'Engagement Ring', 'Green Loans', 'Household Expenses', 'Large Purchases', 'Medical/Dental', 'Motorcycle', 'RV', 'Taxes', 'Vacation', 'Wedding Loans'))
+
+t <- pld %>% group_by(LoanOriginationYear) %>% summarise(ListingCategory..numeric. = max(ListingCategory..numeric.))
+
+t
+```
+
+To identify the reason about why in 2013 many people used Prosper, I observed the relation between loan origination year and loan's popular category in that year. However, I cannot find any prosper reason for it, as there is many changes between years for purposes of loans. From 2011 to 2014, category 20; wedding loan, was the most reason for borrowers. 
+
+```{r}
+t <- pld %>%
+  group_by(LoanOriginationYear)
+
+for (i in a$LoanOriginationYearMonthDate) {
+  subset(a, LoanOriginationYearMonthDate == i)
+  }
+
+t <- pld %>%
+  group_by(LoanOriginationYear)
+  
+t <- table(t$ListingCategory..numeric.)
+
+names(t)[which.max(t)]
+
+ggplot(aes(x = ListingCategory..numeric.), data = pld) +
+  stat_count()
+```
+
 
 
 ```{r}
