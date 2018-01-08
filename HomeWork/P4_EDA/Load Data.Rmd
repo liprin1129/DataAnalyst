@@ -37,7 +37,7 @@ It's necessray to know about types of variables, as well as whether they are con
 str(pld)
 ```
 
-# Univariate Plots Section
+# Univariate Analytics
 
 ## Loan Status
 
@@ -307,7 +307,7 @@ Purposes of loans have 20 categories, and each category was recored as a mumeric
 
 The most common reason was debt consolidation.
 
-## Univariate Summary
+## Univariate Analytics Summary
 I shortly investigated some variables themselves which are about states of loans and of borrowers. Through this observation, the data showed meaningful for analytics but dangerous information for the individual borrowers. A large number of people were in charged-off or default situations. Also, borrowers didn't hold good credits when their loan started. Which means easy loan allowance drove into the bad situation for both company and borrowers.
 
 # Bivariate Analytics
@@ -455,68 +455,153 @@ There would be various reason why much more people made a loan on 2013 than othe
 t <- subset(pld, LoanOriginationYear == '2006')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean <- data.frame("APR.06" = t)
+apr_min <- data.frame("APR.06" = t)
 #apr_mean$LOW.APR.06 <- t
 
 t <- subset(pld, LoanOriginationYear == '2007')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.07 <- t
+apr_min$LOW.APR.07 <- t
 
 t <- subset(pld, LoanOriginationYear == '2008')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.08 <- t
+apr_min$LOW.APR.08 <- t
 
 t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.09 <- t
+apr_min$LOW.APR.09 <- t
 
 t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.09 <- t
+apr_min$LOW.APR.09 <- t
 
 t <- subset(pld, LoanOriginationYear == '2010')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.10 <- t
+apr_min$LOW.APR.10 <- t
 
 t <- subset(pld, LoanOriginationYear == '2011')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.11 <- t
+apr_min$LOW.APR.11 <- t
 
 t <- subset(pld, LoanOriginationYear == '2012')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.12 <- t
+apr_min$LOW.APR.12 <- t
 
 t <- subset(pld, LoanOriginationYear == '2013')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.13 <- t
+apr_min$LOW.APR.13 <- t
 
 t <- subset(pld, LoanOriginationYear == '2014')$BorrowerAPR %>%
   table()
 t <- min(as.numeric(names(t)))
-apr_mean$LOW.APR.14 <- t
+apr_min$LOW.APR.14 <- t
 
-apr_mean <- data.frame(rows = row.names(apr_mean), stack(apr_mean))
-apr_mean$count <- as.numeric(table(subset(pld, LoanOriginationYear!="2005")$LoanOriginationYear))
+apr_min <- data.frame(rows = row.names(apr_min), stack(apr_min))
+apr_min$count <- as.numeric(table(subset(pld, LoanOriginationYear!="2005")$LoanOriginationYear))
 
-ggplot(apr_mean) +
+ggplot(apr_min) +
   geom_bar(aes(x = ind, y = count/500000), stat = "identity", color = 'black', fill = '#56B4E9') +
   geom_line(aes(x = ind, y = as.numeric(values), group = 1), color = 'red') +
   labs(y = 'APR')+
   scale_y_continuous(sec.axis = sec_axis(~.*500000, name = "Originated Year Count"))
 ```
 
-Then, I searched the lowest APR rate of each year. 
+Then, I searched the lowest APR rate of each year. Likewise, as APR rate of which many people used in that year, there seems not no proper reason for low APR rate would lead the increase of high demanding on Prosper loan company on 2013.
+
+So I caculated correlation coefficients for both cases above. 
+```{r}
+cor(as.numeric(apr_mean$values), apr_mean$count)
+
+cor(apr_min$values, apr_min$count)
+```
+Correlation coefficient for loan usage count and maximum APR rate of each year is 0.2613778, and minimum APR rate of each year and loan usage count is 0.3391221. According to my assumption that low APR rate caused more loans, this values should be minus. However, it wasn't.
+
+As a consequence for Loan Original Year and APR, I want to opposite my original assumption. It is not that low APR cause high demantion demand on Prosper loan company. It is that because many people used Prosper, it increased lowest interest rate.
+
+## Monthly Loan payment and Monthly Income
 
 ```{r}
-require(dplyr)
+cor(pld$StatedMonthlyIncome, pld$MonthlyLoanPayment)
+
+pld$MonthlyPaymentAndImcomeRate <- pld$MonthlyLoanPayment/pld$StatedMonthlyIncome
+Monthly <- subset(pld, MonthlyPaymentAndImcomeRate != "Inf" & MonthlyPaymentAndImcomeRate != "NaN")
+
+most <- names(table(Monthly$MonthlyPaymentAndImcomeRate))[which.max(Monthly$MonthlyPaymentAndImcomeRate)]
+percent95 <- quantile(pld$MonthlyPaymentAndImcomeRate, probs = .95, na.rm = TRUE)
+
+ggplot(aes(x = as.numeric(MonthlyPaymentAndImcomeRate)), data = Monthly) +
+  geom_histogram(binwidth = 0.005)+
+  xlim(0, 1) +
+  geom_vline(xintercept = percent95, 
+             linetype = 'dashed', color = 'blue')
+```
+
+It seems that most people managed properly their loans' payment. They have an about 0.05 monthly income and payment rate. Although 86 percent of people paid back their loans by a tenth of their income, other people spent their monthly income for debts by the amount over a tenth. 
+
+```{r}
+Monthly_high <- subset(pld, 
+                  MonthlyPaymentAndImcomeRate > quantile(MonthlyPaymentAndImcomeRate, probs = .95, na.rm = TRUE),
+                  MonthlyPaymentAndImcomeRate != "Inf" & MonthlyPaymentAndImcomeRate != "NaN")
+
+Monthly_low <- subset(pld, 
+                  MonthlyPaymentAndImcomeRate < quantile(MonthlyPaymentAndImcomeRate, probs = .95, na.rm = TRUE),
+                  MonthlyPaymentAndImcomeRate != "Inf" & MonthlyPaymentAndImcomeRate != "NaN")
+
+table(Monthly_high$LoanStatus)
+
+p1 <- ggplot(aes(x = LoanStatus), data = Monthly_high) +
+  stat_count() +
+  ggtitle("Monthly over 10%")
+
+p2 <- ggplot(aes(x = LoanStatus), data = Monthly_low) +
+  stat_count() +
+  ggtitle("Monthly below 10%")
+
+library(gridExtra)
+grid.arrange(p1, p2, nrow = 2)
+```
+
+This plots of course seem quite in accord with intuition. People who had the payment-income rate over than 10% tended to be more in a situation of charged-off and defaulted than those who holded it 10% below. Interestingly, Completed status count was higher in the 'over 10% group'. I think that the heavy burdens for monthly repayments on them might stimulate to pay back their loans.
+
+# Final Plots
+```{r}
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (>120 days)"] <- "Dangerous"
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (1-15 days)"] <- "Dangerous"
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (16-30 days)"] <- "Dangerous"
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (31-60 days)"] <- "Dangerous"
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (61-90 days)"] <- "Dangerous"
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (91-120 days)"] <- "Dangerous"
+
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Chargedoff"] <- "Dangerous"
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Defaulted"] <- "Dangerous"
+
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Completed"] <- "Safe"
+levels(pld$LoanStatus)[levels(pld$LoanStatus) == "FinalPaymentInProgress"] <- "Safe"
+
+ggplot(aes(x = LoanOriginalAmount, y = MonthlyLoanPayment), data = subset(pld, !is.na(LoanStatus) & 
+                                                                            LoanStatus != "Cancelled" &
+                                                                            LoanStatus != "Current")) +
+  geom_point(aes(colour = LoanStatus), alpha = 0.1, size = 2, position = 'jitter') #+
+  #scale_color_brewer(type = 'div') #+
+  #scale_x_log10()
+```
+
+```{r}
+ggplot(aes(x = LoanOriginalAmount, y = MonthlyLoanPayment), data = subset(pld, LoanStatus == "Chargedoff")) +
+  geom_point(position = 'jitter')
+```
+--------------------------------------------------------------------------------------------------
+
+
+```{r}
+#require(dplyr)
 ListingCategory <- data.frame(c('Not Available', 'Debt Consolidation', 'Home Improvement', 'Business', 'Personal Loan', 'Student Use', 'Auto', 'Other', 'Baby&Adoption', 'Boat', 'Cosmetic Procedure', 'Engagement Ring', 'Green Loans', 'Household Expenses', 'Large Purchases', 'Medical/Dental', 'Motorcycle', 'RV', 'Taxes', 'Vacation', 'Wedding Loans'))
 
 t <- pld %>% group_by(LoanOriginationYear) %>% summarise(ListingCategory..numeric. = max(ListingCategory..numeric.))
