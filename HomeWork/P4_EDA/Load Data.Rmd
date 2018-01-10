@@ -571,25 +571,56 @@ grid.arrange(p1, p2, nrow = 2)
 This plots of course seem quite in accord with intuition. People who had the payment-income rate over than 10% tended to be more in a situation of charged-off and defaulted than those who holded it 10% below. Interestingly, Completed status count was higher in the 'over 10% group'. I think that the heavy burdens for monthly repayments on them might stimulate to pay back their loans.
 
 # Final Plots
+
+Because there are 113937 samples in the dataset, it difficult to identify points when I plot points for continuous variables. So, for easy to see, I randomly sampled 1000 dataset.
+
 ```{r}
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (>120 days)"] <- "Dangerous"
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (1-15 days)"] <- "Dangerous"
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (16-30 days)"] <- "Dangerous"
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (31-60 days)"] <- "Dangerous"
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (61-90 days)"] <- "Dangerous"
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Past Due (91-120 days)"] <- "Dangerous"
+library(memisc)
+pld$LoanStatusSimple <- pld$LoanStatus
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (>120 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (1-15 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (16-30 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (31-60 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (61-90 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (91-120 days)"] <- "Dangerous"
 
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Chargedoff"] <- "Dangerous"
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Defaulted"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Chargedoff"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Defaulted"] <- "Dangerous"
 
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "Completed"] <- "Safe"
-levels(pld$LoanStatus)[levels(pld$LoanStatus) == "FinalPaymentInProgress"] <- "Safe"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Completed"] <- "Safe"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "FinalPaymentInProgress"] <- "Safe"
 
-ggplot(aes(x = LoanOriginalAmount, y = MonthlyLoanPayment), data = subset(pld, !is.na(LoanStatus) & 
-                                                                            LoanStatus != "Cancelled" &
-                                                                            LoanStatus != "Current")) +
-  geom_point(aes(colour = LoanStatus), alpha = 0.1, size = 2, position = 'jitter') #+
+set.seed(20022012)
+pld_samp <- pld[sample(1:length(pld$MonthlyLoanPayment), 10000), ]
+# MonthlyLoanPayment
+# LoanOriginalAmount
+# BorrowerAPR
+
+ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate, colour = LoanStatusSimple), data = subset(pld_samp, !is.na(LoanStatusSimple) & LoanStatusSimple != "Cancelled" & LoanStatusSimple != "Current" & LoanOriginalAmount <= 25000)) +
+  geom_point(alpha = 0.1, size = 3) +
+  geom_smooth(span = 0.9, se = FALSE) #method = 'lm'
   #scale_color_brewer(type = 'div') #+
+  #xlim(0, 1000)
+  #scale_x_log10()
+```
+
+Regardless of loan original amount, people were in dangerous situation (delayed payment, charged-off, and defaulted) when interest rates for their loans started over about 0.2. It seems there are aligned lines between in the two groups, which might distinguish .
+
+```{r}
+ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate), data = subset(pld, LoanStatusSimple == "Dangerous")) +
+  geom_point() +
+  geom_smooth(method = 'lm', se = TRUE)
+```
+
+자신들의 소득 수준에 맞게 대출을 받았지만 이자율은 계산하지 않았기 때문일까? 이자율이 높고 소득이 작아서 위험한 상황이 발생하는 건 아닐까?
+
+```{r}
+ggplot(aes(x = LoanOriginalAmount, y = MonthlyPaymentAndImcomeRate), data = subset(pld, !is.na(LoanStatusSimple) & 
+                                                                            LoanStatusSimple != "Cancelled" &
+                                                                            LoanStatusSimple != "Current")) +
+  geom_point(aes(colour = LoanStatusSimple), alpha = 0.5, size = 3)
+  #scale_color_brewer(type = 'div') #+
+  #ylim(0, 0.9)
   #scale_x_log10()
 ```
 
