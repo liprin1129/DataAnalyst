@@ -530,7 +530,7 @@ As a consequence for Loan Original Year and APR, I want to opposite my original 
 ```{r}
 cor(pld$StatedMonthlyIncome, pld$MonthlyLoanPayment)
 
-pld$MonthlyPaymentAndImcomeRate <- pld$MonthlyLoanPayment/pld$StatedMonthlyIncome
+pld$MonthlyPaymentAndImcomeRate <- round(pld$caculatedMonthlyLoanPayment/pld$StatedMonthlyIncome, 2)
 Monthly <- subset(pld, MonthlyPaymentAndImcomeRate != "Inf" & MonthlyPaymentAndImcomeRate != "NaN")
 
 most <- names(table(Monthly$MonthlyPaymentAndImcomeRate))[which.max(Monthly$MonthlyPaymentAndImcomeRate)]
@@ -538,9 +538,9 @@ percent95 <- quantile(pld$MonthlyPaymentAndImcomeRate, probs = .95, na.rm = TRUE
 
 ggplot(aes(x = as.numeric(MonthlyPaymentAndImcomeRate)), data = Monthly) +
   geom_histogram(binwidth = 0.005)+
-  xlim(0, 1) +
-  geom_vline(xintercept = percent95, 
-             linetype = 'dashed', color = 'blue')
+  #geom_histogram(binwidth = 10) +
+  geom_vline(xintercept = percent95, linetype = 'dashed', color = 'blue') +
+  xlim(0, 1)
 ```
 
 It seems that most people managed properly their loans' payment. They have an about 0.05 monthly income and payment rate. Although 86 percent of people paid back their loans by a tenth of their income, other people spent their monthly income for debts by the amount over a tenth. 
@@ -558,11 +558,11 @@ table(Monthly_high$LoanStatus)
 
 p1 <- ggplot(aes(x = LoanStatus), data = Monthly_high) +
   stat_count() +
-  ggtitle("Monthly over 10%")
+  ggtitle("Monthly pay back over 10%")
 
 p2 <- ggplot(aes(x = LoanStatus), data = Monthly_low) +
   stat_count() +
-  ggtitle("Monthly below 10%")
+  ggtitle("Monthly pay back below 10%")
 
 library(gridExtra)
 grid.arrange(p1, p2, nrow = 2)
@@ -576,27 +576,27 @@ Because there are 113937 samples in the dataset, it difficult to identify points
 
 ```{r}
 library(memisc)
-pld$LoanStatusSimple <- pld$LoanStatus
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (>120 days)"] <- "Dangerous"
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (1-15 days)"] <- "Dangerous"
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (16-30 days)"] <- "Dangerous"
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (31-60 days)"] <- "Dangerous"
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (61-90 days)"] <- "Dangerous"
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (91-120 days)"] <- "Dangerous"
+Monthly$LoanStatusSimple <- Monthly$LoanStatus
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (>120 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (1-15 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (16-30 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (31-60 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (61-90 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (91-120 days)"] <- "Dangerous"
 
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Chargedoff"] <- "Dangerous"
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Defaulted"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Chargedoff"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Defaulted"] <- "Dangerous"
 
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Completed"] <- "Safe"
-levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "FinalPaymentInProgress"] <- "Safe"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Completed"] <- "Safe"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "FinalPaymentInProgress"] <- "Safe"
 
-set.seed(20022012)
-pld_samp <- pld[sample(1:length(pld$MonthlyLoanPayment), 10000), ]
+set.seed(2002)
+monthly_samp <- Monthly[sample(1:length(Monthly$MonthlyLoanPayment), 1000), ]
 # MonthlyLoanPayment
 # LoanOriginalAmount
 # BorrowerAPR
 
-ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate, colour = LoanStatusSimple), data = subset(pld_samp, !is.na(LoanStatusSimple) & LoanStatusSimple != "Cancelled" & LoanStatusSimple != "Current" & LoanOriginalAmount <= 25000)) +
+ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate, colour = LoanStatusSimple), data = subset(monthly_samp, !is.na(LoanStatusSimple) & LoanStatusSimple != "Cancelled" & LoanStatusSimple != "Current" & LoanOriginalAmount <= 25000)) +
   geom_point(alpha = 0.1, size = 3) +
   geom_smooth(span = 0.9, se = FALSE) #method = 'lm'
   #scale_color_brewer(type = 'div') #+
@@ -604,7 +604,38 @@ ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate, colour = LoanStatusSimple),
   #scale_x_log10()
 ```
 
-Regardless of loan original amount, people were in dangerous situation (delayed payment, charged-off, and defaulted) when interest rates for their loans started over about 0.2. It seems there are aligned lines between in the two groups, which might distinguish .
+It seems there are aligned lines between the two groups. Regardless of loan original amount, the interest rates of people who were in dangerous situation (delayed payment, charged-off, and defaulted) are always higher than the interst rates of those in safe situation. Between two lines, there is a gap about 0.05. Higher interest rate might not a only causation for bad individual financial crisis.
+
+It's also possible that people might think they could repay their loans properly when they made a lone but they actually struggled to pay back after some period, because life isn't what they all think it will be. For those, monthly payments of a loan might be a heavy burden.
+
+```{r}
+ggplot(aes(x = LoanOriginalAmount, y = DebtToIncomeRatio, colour = LoanStatusSimple), data = subset(Monthly, !is.na(LoanStatusSimple) & LoanStatusSimple != "Cancelled" & LoanStatusSimple != "Current")) +
+  geom_point(alpha = 0.1, size = 3, position = 'jitter') +
+  geom_smooth(method = 'loess', span = 0.9, se = FALSE) +
+  #scale_color_brewer(type = 'div') #+
+  #ylim(0, 0.25) +
+  ylim(0, 1)
+  #scale_x_log10()
+```
+
+Unfortunately, there is not a great difference in the raio of monthly payment to monthly income in original small amount of loan. The gap between two lines become larger as original amount of loan increase. Even though the small gap in small original amount of it, it's obvious people in financial crisis paid back more money for their loan.
+
+```{r}
+set.seed(2002)
+pld_samp <- pld[sample(1:length(pld$MonthlyLoanPayment), 1000), ]
+
+library(GGally)
+
+ggpairs(pld_samp, #axisLabels = 'internal',
+  lower = list(continuous = wrap("points", shape = I('.'))),
+  upper = list(combo = wrap("box", outlier.shape = I('.'))))
+```
+
+```{r}
+#LoanStatusSimple
+ggplot(aes(x=IsBorrowerHomeowner, fill = CreditGrade), data=subset(Monthly, !is.na(LoanStatusSimple) & LoanStatusSimple != "Cancelled" & LoanStatusSimple != "Current" & CreditGrade != "")) + 
+  stat_count()
+```
 
 ```{r}
 ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate), data = subset(pld, LoanStatusSimple == "Dangerous")) +
@@ -612,20 +643,8 @@ ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate), data = subset(pld, LoanSta
   geom_smooth(method = 'lm', se = TRUE)
 ```
 
-자신들의 소득 수준에 맞게 대출을 받았지만 이자율은 계산하지 않았기 때문일까? 이자율이 높고 소득이 작아서 위험한 상황이 발생하는 건 아닐까?
-
 ```{r}
-ggplot(aes(x = LoanOriginalAmount, y = MonthlyPaymentAndImcomeRate), data = subset(pld, !is.na(LoanStatusSimple) & 
-                                                                            LoanStatusSimple != "Cancelled" &
-                                                                            LoanStatusSimple != "Current")) +
-  geom_point(aes(colour = LoanStatusSimple), alpha = 0.5, size = 3)
-  #scale_color_brewer(type = 'div') #+
-  #ylim(0, 0.9)
-  #scale_x_log10()
-```
-
-```{r}
-ggplot(aes(x = LoanOriginalAmount, y = MonthlyLoanPayment), data = subset(pld, LoanStatus == "Chargedoff")) +
+ggplot(aes(x = LoanOriginalAmount, y = caculatedMonthlyLoanPayment), data = subset(pld, LoanStatus == "Chargedoff")) +
   geom_point(position = 'jitter')
 ```
 --------------------------------------------------------------------------------------------------

@@ -102,7 +102,7 @@ library(memisc)
 
 # sample 10,000 diamonds from the data set
 set.seed(20022012)
-diamond_samp <- diamonds[sample(1:length(diamonds$price), 10000), ]
+diamond_samp <- diamonds[sample(1:length(diamonds$price), 1000), ]
 
 ggpairs(diamond_samp, #axisLabels = 'internal',
   lower = list(continuous = wrap("points", shape = I('.'))),
