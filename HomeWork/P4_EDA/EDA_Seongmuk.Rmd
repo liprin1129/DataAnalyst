@@ -1,0 +1,775 @@
+---
+title: "Load Data"
+author: "Seongmuk Gang"
+date: "18 December 2017"
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: inline
+---
+
+## Set Wroking Directory
+```{r}
+#setwd('/mnt/SharedData/Development/Personal_Dev/DataAnalyst/HomeWork/P4_EDA/')
+setwd("/Users/pure/Private_Local_Data/Study/Udacity/DataAnalyst/HomeWork/P4_EDA/")
+```
+
+## Import Libraries
+```{r import library}
+library(ggplot2)
+library(dplyr)
+```
+
+## Features of data
+I'm curious about why people take loans and what kinds of factors have effects on people to take a loan. There must be as well relations between those factors. However, it also must be hard to show clear correlations between such complex data. Therefore, I want to start Exploratory Data Analysis before I deeply dive into the dataset.
+
+First of all, I loaded csv data to R dataframe, and searched a length and number of variables. There are 113,937 debtors with 81 factors in the data.
+
+```{r load csv}
+pld <- read.csv('prosperLoanData.csv')
+names(pld)
+dim(pld)
+```
+
+It's necessray to know about types of variables, as well as whether they are continuous or discrete.
+```{r}
+str(pld)
+```
+
+# Univariate Analytics
+
+## Loan Status
+Most of borrowers are currently repaying their private loans. Following that, completed loan is the next most status. Although many people pay back their loans completely, there are still more bollowers who are in bebt than those who completed loans. 
+```{r univariate loan state}
+ggplot(data=pld,aes(LoanStatus))+
+  stat_count()+
+  scale_y_sqrt()+
+  labs(y="sqrt count")
+```
+
+
+```{r}
+pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n())
+```
+
+```{r}
+pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus != "Cancelled" & LoanStatus 
+         != "Completed" & LoanStatus != "Current")
+```
+
+```{r sum laon state}
+pld$num_debtors <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus != "Cancelled" & LoanStatus != "Completed", 
+         select = n) %>%
+  sum()
+
+pld$num_debtors[1]
+```
+There are 75,858 debtors in total. Sadly, many people are in trouble to pay back loans. 19,282 people couldn't repay on time; 11,992 loans are charged-off and 5,018 people are in default on their loan.
+
+```{r sum laon state2}
+pld$delayed_payment <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus != "Cancelled" & LoanStatus != "Completed" & 
+           LoanStatus != "Current" & LoanStatus != "Chargedoff" &
+           LoanStatus != "Defaulted" & LoanStatus != "FinalPaymentInProgress", 
+         select = n) %>%
+  sum()
+
+pld$delayed_payment[1]
+```
+2,067 people are not in urgent situation such as default or charged-off, but still of credit decline possibility, because of delayed repayment.
+
+Then, I plotted above information using percentage scale for easy comparison. 
+```{r sum Charged-off and Defaulted Debtors}
+pld$dangerous_debtors <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus == "Chargedoff" | LoanStatus == "Defaulted", 
+         select = n) %>%
+  sum()
+
+pld$good_debtors <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus == "Current", 
+         select = n) %>%
+  sum()
+
+pld$non_deptors <- pld %>%
+  group_by(LoanStatus) %>%
+  summarise(n=n()) %>%
+  subset(LoanStatus == "Completed" | LoanStatus == "Cancelled", select = n) %>%
+  sum()
+
+debt_or_no_df = data.frame(state = c("non_deptors", "num_debtors"),
+                value = c(pld$non_deptors[1], pld$num_debtors[1]))
+
+ggplot(aes(x = state, y = value/nrow(pld)*100), data = debt_or_no_df) + geom_bar(stat='identity') +
+  labs(y = "borrower state %")
+```
+The number of those who have no any loan is much smaller than the number of people holding loans.
+
+```{r}
+debt_stat_df = data.frame(state = c("good borrowers", "delayed payment", "dangerous debtors"),
+                value = c(pld$good_debtors[1], pld$delayed_payment[1], pld$dangerous_debtors[1]))
+
+ggplot(aes(x = state, y = value/nrow(pld)*100), data = debt_stat_df) + geom_bar(stat='identity') +
+  labs(y = "debt state %")
+```
+
+Among the people holding a loan, almost borrowers have no broblem in repaying their loan. Unfortunately, charged-off and defaulted case took about 18%.
+
+## Credit Grade
+I ploted credit grade. There are a lot of no information which is populated after 2009, so I omitted it.
+
+```{r}
+#pr$ListingCreationDate <- as.Date(pr$ListingCreationDate, format = "%Y-%m-%d %H:%M:%S") 
+subset(pld, CreditGrade !="") %>%
+ggplot(aes(x = CreditGrade)) +
+  stat_count()
+```
+
+Credit grade seems normally distributed, except lowest credit grade (HR) is slightly high. This plot shows something rediculous result, because loans were also admitted to HR and NC groups to which loans must not be allowed. 
+
+I could not easily conclude at this stage a reason that this led default and charged-off situation, but it might be one of the factor for that. Moreover, It can be suspected that why credit grade information wasn't recorded since 2009. It is because that allowing loans for low credit grade people had been admitted a lot and Prosper didn't want to hide that.
+
+## Length of Loans
+There are three types of loan legth; 12 months, 36 months, and 60 months.
+```{r}
+pld$Term<-factor(pld$Term)
+
+ggplot(data=pld,aes(Term)) + 
+  geom_bar(color=I('black'),fill=I('#56B4E9'))
+```
+```{r}
+table(pld$Term)/nrow(pld)*100
+```
+
+36 months loan is the most popular, 77.0%, followed by long term loan (60 months), 21.5%. 12 months loan had just a small portion, 1.4%.
+
+## Interest Rate
+Borrower's APR seems uniformly distributed with bin width 0.01. Minimum rate was 0.007% and maximum rate was 0.5%, despite the peak on about 0.37 %.
+```{r}
+ggplot(aes(x = BorrowerAPR), data = pld) +
+  geom_histogram(binwidth = 0.01, color = 'black', fill = '#56B4E9')
+```
+
+```{r}
+summary(pld$BorrowerAPR)
+```
+
+## The origination amount of loans.
+```{r}
+ggplot(aes(x = LoanOriginalAmount), data = pld) +
+  geom_histogram(binwidth = 1000, color = 'black', fill = '#56B4E9')
+```
+
+Original amounts of loans look like left-skewed with bin width 1000. However, there are some peaks in higher amounts. Probably they were the popular amount many people borrowed.
+
+################################################################################################################
+## The date loans were originated.
+################################################################################################################
+I plotted years in which loans were originated. 
+```{r}
+Sys.setenv(TZ="Asia/Tokyo")
+Sys.getenv("TZ")
+pld$LoanOriginationYear <- format(as.Date(pld$LoanOriginationDate, format = "%Y-%m-%d %H:%M:%S"), "%Y")
+
+ggplot(aes(x=LoanOriginationYear), data=pld)+
+  geom_bar()
+```
+
+Loans approved by Prosper dramatically dropped in 2009. However, the number of approved loans rose by a lot, and in 2013 it touched a peack. After the year, the number of loans greatly fell. I wonder why Prosper was so popular in 2013, so will investigate in the next chapter.
+
+## The scheduled monthly loan payment.
+
+```{r}
+summary(pld$MonthlyLoanPayment)
+
+ggplot(aes(x = MonthlyLoanPayment), data = pld) +
+  geom_histogram(binwidth = 50)
+```
+
+Monthly loan payment seems totally left skewed. However, this is not convincing for me, because I assumed montly loan payment depends on the origination amount of the loan. 
+So, I investigated more in detail by calculating montly loan payment using original loan amount and terms of when loans were bonded.
+
+```{r}
+pld$caculatedMonthlyLoanPayment <- as.numeric(pld$LoanOriginalAmount) / (as.numeric(pld$Term)*12)
+pld$caculatedMonthlyLoanPayment <- pld$caculatedMonthlyLoanPayment + pld$caculatedMonthlyLoanPayment  * pld$BorrowerAPR
+ggplot(aes(caculatedMonthlyLoanPayment), data = pld) + geom_histogram(binwidth = 40)
+```
+
+Rough equation is like this; $ \frac{\text{Original Amount} }{\text{Term}} + \text{Original Amount} \times \text{APR} $. After plotting the result of the equation, though the shape of histogram doesn't identical with MonthlyLoanPayment variable, but looks simlar. Therefore, even though there are some peaks on original loan amount, montly loan payment has left skewed distribution because it is related to APR.
+
+## Monthly Income
+I checked monthly incomes of borrowers.
+```{r}
+summary(pld$StatedMonthlyIncome)
+
+ggplot(aes(StatedMonthlyIncome), data=pld) +
+  geom_histogram(binwidth = 5000, color = 'black', fill = '#56B4E9')
+  #geom_histogram(binwidth=500, color=I('black'), fill=I("#F79420") )
+  #xlim(0,10000)
+```
+
+Monthly imcome seem to have tremendous outliers. The histogram above with 5000\$ binwidth shows most borrowers earn sarary below than 250000\$. 
+
+To identify outliers, I used boxplot.
+```{r}
+ggplot(aes(x = "All Borrwers", y = StatedMonthlyIncome), data=pld) +
+  geom_boxplot() +
+  labs(x = "")
+```
+
+There is a huge gap between the largest outlier and within IQR. The largest outlier is about 2 million dolloars.
+
+To see in detail, I cut the x axis up to 25000\$.
+
+```{r}
+ggplot(aes(x = "All Borrwers", y = StatedMonthlyIncome), data=pld) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = c(0, 25000)) +
+  labs(x = "")
+```
+
+Mean looks like below than 5000.
+
+```{r}
+ggplot(aes(StatedMonthlyIncome), data=pld) +
+  geom_histogram(binwidth = 500, color = 'black', fill = '#56B4E9') +
+  xlim(0,25000)
+```
+
+Obviously, it has left-skewed shape. 
+
+If I cut the x axis up to 8000\$, I can see the first and third quantiles, which are about 7000 and 3000 respectively.
+
+```{r}
+ggplot(aes(x = "All Borrwers", y = StatedMonthlyIncome), data=pld) +
+  geom_boxplot() + 
+  coord_cartesian(ylim = c(0, 8000)) +
+  labs(x = "")
+```
+
+
+```{r}
+ggplot(aes(StatedMonthlyIncome), data=pld) +
+  geom_histogram(binwidth = 500, color = 'black', fill = '#56B4E9') +
+  xlim(0,8000)
+```
+
+When I cut it by 10000 \$which has most data with 500\$ bin, it seems nomarly distributed. 
+
+## Home owner?
+
+```{r}
+ggplot(aes(x = IsBorrowerHomeowner), data = pld) +
+  geom_bar()
+```
+
+A number of house owners and tanents almost same, but the number of houseowners is slightly higher than the number of tanents.
+
+# Purpose of Loans
+```{r}
+ggplot(aes(x = ListingCategory..numeric.), data = pld) +
+  stat_count()
+```
+
+Purposes of loans have 20 categories, and each category was recored as a mumeric value, such as
+
+0 - Not Available
+1 - Debt Consolidation
+2 - Home Improvement
+3 - Business
+4 - Personal Loan
+5 - Student Use
+6 - Auto
+7- Other
+8 - Baby&Adoption
+9 - Boat
+10 - Cosmetic Procedure
+11 - Engagement Ring
+12 - Green Loans
+13 - Household Expenses
+14 - Large Purchases
+15 - Medical/Dental
+16 - Motorcycle
+17 - RV
+18 - Taxes
+19 - Vacation
+20 - Wedding Loans
+
+The most common reason was debt consolidation.
+
+## Bivariate Analytics Summary
+I shortly investigated some variables themselves which are about states of loans and of borrowers. Through this observation, the data showed meaningful for analytics, as well as dangerous information such as charged-off or defaulted of the individual borrowers. A large number of people were in charged-off or default situations. Also, many borrowers didn't hold good credits when their loan started. Which means easy loan approval drove into the bad situation to both company and borrowers.
+
+# Bivariate Analytics
+
+## Credit Grade and Loan Status
+I'm curious about how credit grades of borrowers have effects on their loan status. There are an level with no information in CreditGrade variable indicated as "" when I invested it in univariate session, I omitted it and plotted.
+```{r}
+#set.seed(1836)
+
+#pld_subset <- subset(pld, select = c(LoanStatus, CreditGrade,Term, BorrowerAPR, LoanOriginalAmount, LoanOriginationYear, MonthlyLoanPayment, StatedMonthlyIncome, IsBorrowerHomeowner))
+
+#names(pld_subset)
+
+#ggpairs(pf_subset[sample.int(nrow(pf_subset), 100), ], axisLabels = 'internal')
+
+#revalue(pld$LoanStatus, c("Cancelled" = "Cancelled", "Chargedoff" = "Chargedoff", "Completed" = "Completed", "Current" = "Current", "Defaulted" = "Defaulted", "Final" = "Final", "Past Due (1-15 days)" = "1-15 days", "Past Due (>120 days)" = ">120 days", "Past Due (16-30 days)" = "16-30 days", "Past Due (31-60 days)"= "31-60 days", "Past Due (61-90 days)" = "61-90 days", "Past Due (91-120 days)" ="91-120 days"))
+
+#pld$LoanStatus <- factor(pld$LoanStatus, levels = c("Cancelled", "Chargedoff", "Completed", "Current", "Defaulted", "Final", "1-15 days", ">120 days", "16-30 days", "31-60 days", "61-90 days", "91-120 days"))
+
+ggplot(aes(x = LoanStatus), data = subset(pld, CreditGrade !="")) +
+  stat_count()+
+  facet_wrap(~CreditGrade, ncol = 2)
+```
+
+Interestingly, people who have credit grade have only cancelled, charged-off, completed, and defaulted statuses. 
+
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, CreditGrade == "")) +
+  stat_count()
+```
+
+And then I plotted loan status in terms of no credit grade. There are all loan statuses. Probably, credit grade variable is not national status, but prosper's internal status. It's unpredicted result, as I assumed credit grade is national grades. Credit grades in the first plot of LoanStatus only have 4 loan statuses. 
+
+## Loan Status and Length of Loans
+```{r}
+ggplot(aes(x = LoanStatus), data = pld) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1)
+```
+
+Current is the largest number in 36 and 60 terms loans.
+
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, Term == "12")) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1)
+```
+
+In 12 term loans, most people completed paying back loans, and charged-off and current status competed for the second place.
+
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, Term == "36")) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1)
+```
+```{r}
+ggplot(aes(x = LoanStatus), data = subset(pld, Term == "60")) +
+  stat_count() +
+  facet_wrap(~Term, nrow = 1) +
+  scale_x_discrete(name ="Loan Status", limits=c("Cancelled", "Chargedoff", "Completed", "Current", "Defaulted", "Final", "1-15 days", ">120 days", "16-30 days", "31-60 days", "61-90 days", "91-120 days"))
+```
+In both 60 and 36 terms, most people are paying back their loans. However, there are big gap between Current and Completed status in 60 terms loan, although 36 terms loan has not much difference as it between Current and Completed Status.
+
+In summary, as terms of loans were shoter, the portion of Completed status were larger.
+
+## Loan Status and Amount of Loan
+
+```{r}
+pld$OriginalLoanAmount.bucket <- cut(pld$LoanOriginalAmount, breaks = c(1000, 5000, 10000, 15000, 20000,
+                                                                        25000, 30000, 35000))
+
+table(pld$OriginalLoanAmount.bucket)
+
+ggplot(aes(x = LoanStatus), data = pld) +
+  stat_count() +
+  facet_wrap(~OriginalLoanAmount.bucket, nrow = 2) + 
+  theme(axis.text.x = element_blank(), axis.text.y = element_blank())
+```
+
+I grouped original loan amount into 8 groups by \$5000. Current status are dominant in almost groups. Only \$1000 ~ 5000 group has the largest height on Completed status. This result is the same as Loan Status and Length of Loans bar chart. Larger amounts of original loans tended to have smaller repayment rate.
+
+## Loan Status and Occupation
+I found that many people wer in struggles for repaying the loans though above analysis. Suddenly, I seriously wondered what kind of occupation group were most pained by financial crisis. 
+
+As there are 68 levels in Occupation variable, ploting the all levels in a graph cannot distinguish any relations. So, firstly I gouped those occupations into 9 categories; student, hospital, sales, food, financial, scientist, laborer, government official. Then I divided the total counts of each categories in dangerous financial situation by the total number of each categories.
+```{r}
+pld$LoanStatusSimple <- pld$LoanStatus
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (>120 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (1-15 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (16-30 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (31-60 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (61-90 days)"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Past Due (91-120 days)"] <- "Dangerous"
+
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Chargedoff"] <- "Dangerous"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Defaulted"] <- "Dangerous"
+
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "Completed"] <- "Safe"
+levels(pld$LoanStatusSimple)[levels(pld$LoanStatusSimple) == "FinalPaymentInProgress"] <- "Safe"
+
+pld$OccupationSimple <- pld$Occupation
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Engineer - Chemical"] <- "Engineer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Engineer - Electrical"] <- "Engineer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Engineer - Mechanical"] <- "Engineer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Computer Programmer"] <- "Engineer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Architect"] <- "Engineer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Landscaping"] <- "Engineer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Professional"] <- "Engineer"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Student - College Freshman"] <- "Student"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Student - College Graduate Student"] <- "Student"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Student - College Junior"] <- "Student"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Student - College Senior"] <- "Student"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Student - College Sophomore"] <- "Student"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Student - Community College"] <- "Student"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Student - Technical School"] <- "Student"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Teacher's Aide"] <- "Teacher"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Principal"] <- "Teacher"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Professor"] <- "Teacher"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Nurse (LPN)"] <- "Hospital"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Nurse (RN)"] <- "Hospital"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Nurse's Aide"] <- "Hospital"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Dentist"] <- "Hospital"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Doctor"] <- "Hospital"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Medical Technicion"] <- "Hospital"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Pharmacist"] <- "Hospital"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Sales - Commission"] <- "Sales"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Sales - Retail"] <- "Sales"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Car Dealer"] <- "Sales"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Retail Management"] <- "Sales"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Tradesman"] <- "Sales"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Military Enlisted"] <- "Military"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Military Officer"] <- "Military"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Food Service"] <- "Food"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Food Service Management"] <- "Food"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Accountant/CPA"] <- "Financial"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Analyst"] <- "Financial"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Investor"] <- "Financial"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Biologist"] <- "Scientist"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Chemist"] <- "Scientist"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Psychologist"] <- "Scientist"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Bus Driver"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Construction"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Homemaker"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Truck Driver"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Waiter/Waitress"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Tradesman - Carpenter"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Tradesman - Electrician"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Tradesman - Mechanic"] <- "Laborer"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Tradesman - Plumber"] <- "Laborer"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Administrative Assistant"] <- "Government Official"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Civil Service"] <- "Government Official"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Fireman"] <- "Government Official"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Police Officer/Correction Officer"] <- "Government Official"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Postal Service"] <- "Government Official"
+
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Attorney"] <- "Court"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Executive"] <- "Court"
+levels(pld$OccupationSimple)[levels(pld$OccupationSimple) == "Judge"] <- "Court"
+
+
+total_occupation <- table(pld$OccupationSimple)[c("Student", "Engineer", "Hospital", "Sales", "Food", "Financial", "Scientist", "Laborer", "Government Official")]
+
+dangerous_occupation <- subset(pld, LoanStatusSimple == "Dangerous")$OccupationSimple %>%
+  table()
+
+dangerous_occupation <- dangerous_occupation[c("Student", "Engineer", "Hospital", "Sales", "Food", "Financial", "Scientist", "Laborer", "Government Official")]
+
+occupation_rate <- data.frame(dangerous_occupation/total_occupation)
+
+#ggplot(aes(x = c("Student", "Engineer", "Hospital", "Sales", "Food", "Financial", "Scientist", "Laborer", "Government Official"), y = Freq), data =occupation_rate) + geom_bar()
+
+ggplot(aes(x = ., y = Freq), data = occupation_rate) +
+  geom_bar(stat="identity")
+```
+As the plot above, larger number of students are in dangerous situation than other occupations. 
+
+```{r}
+student_state <- data.frame(table(subset(pld, OccupationSimple == "Student")$LoanStatusSimple))
+
+ggplot(aes(x = Var1, y = Freq/sum(Freq)), data = subset(student_state, Var1 != "Cancelled")) +
+  geom_bar(stat="identity")
+```
+
+Over 20% of students in the student category couldn't pay back their loans on time.
+
+```{r}
+ggplot(aes(LoanStatus), data = subset(pld, OccupationSimple == "Student" & LoanStatusSimple == "Dangerous")) +
+  stat_count()
+```
+
+Moreover, many student are charged-off and defaulted rather than delayed to repay their loans. It's quite embarrassing. 
+
+## Loan Original Year and APR
+There would be various reason why much more people made a loan on 2013 than other years. Firstly, I assumed low APR might lead that trend, so inquiried APR rates which the most people used in each year.
+```{r}
+t <- subset(pld, LoanOriginationYear == '2006')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean <- data.frame("APR.06" = t)
+apr_mean$APR.06 <- t
+
+t <- subset(pld, LoanOriginationYear == '2007')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.07 <- t
+
+t <- subset(pld, LoanOriginationYear == '2008')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.08 <- t
+
+t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.09 <- t
+
+t <- subset(pld, LoanOriginationYear == '2010')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.10 <- t
+
+t <- subset(pld, LoanOriginationYear == '2011')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.11 <- t
+
+t <- subset(pld, LoanOriginationYear == '2012')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.12 <- t
+
+t <- subset(pld, LoanOriginationYear == '2013')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.13 <- t
+
+t <- subset(pld, LoanOriginationYear == '2014')$BorrowerAPR %>%
+  table()
+t <- names(t)[which.max(t)]
+apr_mean$APR.14 <- t
+
+apr_mean <- data.frame(rows = row.names(apr_mean), stack(apr_mean))
+apr_mean$count <- as.numeric(table(subset(pld, LoanOriginationYear!="2005")$LoanOriginationYear))
+
+ggplot(apr_mean) +
+  geom_bar(aes(x = ind, y = count/50000), stat = "identity", color = 'black', fill = '#56B4E9') +
+  geom_line(aes(x = ind, y = as.numeric(values), group = 1), color = 'red') +
+  labs(y = 'APR')+
+  scale_y_continuous(sec.axis = sec_axis(~.*50000, name = "Originated Year Count"))
+```
+
+It looks like that after low APR year, people borrowed much money after that year. Especially, from 2010 to 2012, as APR increased, the number of people who used Prosper also goes high. However, it doesn't says 2013's biggest increase. 
+
+Then, I searched the lowest APR rate of each year.
+```{r}
+t <- subset(pld, LoanOriginationYear == '2006')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min <- data.frame("APR.06" = t)
+#apr_mean$LOW.APR.06 <- t
+
+t <- subset(pld, LoanOriginationYear == '2007')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.07 <- t
+
+t <- subset(pld, LoanOriginationYear == '2008')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.08 <- t
+
+t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.09 <- t
+
+t <- subset(pld, LoanOriginationYear == '2009')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.09 <- t
+
+t <- subset(pld, LoanOriginationYear == '2010')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.10 <- t
+
+t <- subset(pld, LoanOriginationYear == '2011')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.11 <- t
+
+t <- subset(pld, LoanOriginationYear == '2012')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.12 <- t
+
+t <- subset(pld, LoanOriginationYear == '2013')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.13 <- t
+
+t <- subset(pld, LoanOriginationYear == '2014')$BorrowerAPR %>%
+  table()
+t <- min(as.numeric(names(t)))
+apr_min$LOW.APR.14 <- t
+
+apr_min <- data.frame(rows = row.names(apr_min), stack(apr_min))
+apr_min$count <- as.numeric(table(subset(pld, LoanOriginationYear!="2005")$LoanOriginationYear))
+
+ggplot(apr_min) +
+  geom_bar(aes(x = ind, y = count/500000), stat = "identity", color = 'black', fill = '#56B4E9') +
+  geom_line(aes(x = ind, y = as.numeric(values), group = 1), color = 'red') +
+  labs(y = 'APR')+
+  scale_y_continuous(sec.axis = sec_axis(~.*500000, name = "Originated Year Count"))
+```
+Likewise of APR rate, there seems no proper reason that low APR rate would lead the increase of high demanding on Prosper loan company on 2013.
+
+So I caculated correlation coefficients for both cases above. 
+```{r}
+cor(as.numeric(apr_mean$values), apr_mean$count)
+
+cor(apr_min$values, apr_min$count)
+```
+Correlation coefficient for loan usage count and maximum APR rate of each year is 0.2613778, and minimum APR rate of each year and loan usage count is 0.3391221. According to my assumption that low APR rate caused more loans, this values should be minus. However, it wasn't.
+
+As a consequence for Loan Original Year and APR, I want to opposite my original assumption; low APRs cause high demands on Prosper loan company. The reason of 2013 year peack is that Prosper deliberately increased lowest interest rate as more people used Prosper loans.
+
+## Monthly Loan payment and Monthly Income
+
+```{r}
+cor(pld$StatedMonthlyIncome, pld$MonthlyLoanPayment)
+
+pld$MonthlyPaymentAndImcomeRate <- round(pld$caculatedMonthlyLoanPayment/pld$StatedMonthlyIncome, 2)
+Monthly <- subset(pld, MonthlyPaymentAndImcomeRate != "Inf" & MonthlyPaymentAndImcomeRate != "NaN")
+
+most <- names(table(Monthly$MonthlyPaymentAndImcomeRate))[which.max(Monthly$MonthlyPaymentAndImcomeRate)]
+percent95 <- quantile(pld$MonthlyPaymentAndImcomeRate, probs = .95, na.rm = TRUE)
+
+ggplot(aes(x = as.numeric(MonthlyPaymentAndImcomeRate)), data = Monthly) +
+  geom_histogram(binwidth = 0.005)+
+  #geom_histogram(binwidth = 10) +
+  geom_vline(xintercept = percent95, linetype = 'dashed', color = 'blue') +
+  xlim(0, 1)
+```
+
+It seems that most people managed properly their loans' payment. They have an about 0.05 monthly income and payment rate. Although 86 percent of people paid back their loans by the amounts smaller than a tenth of their income, other people spent their monthly income for debts over a tenth of their income.
+
+```{r}
+Monthly_high <- subset(pld, 
+                  MonthlyPaymentAndImcomeRate > quantile(MonthlyPaymentAndImcomeRate, probs = .95, na.rm = TRUE),
+                  MonthlyPaymentAndImcomeRate != "Inf" & MonthlyPaymentAndImcomeRate != "NaN")
+
+Monthly_low <- subset(pld, 
+                  MonthlyPaymentAndImcomeRate < quantile(MonthlyPaymentAndImcomeRate, probs = .95, na.rm = TRUE),
+                  MonthlyPaymentAndImcomeRate != "Inf" & MonthlyPaymentAndImcomeRate != "NaN")
+
+table(Monthly_high$LoanStatus)
+
+p1 <- ggplot(aes(x = LoanStatus), data = Monthly_high) +
+  stat_count() +
+  ggtitle("Monthly pay back over 10%")
+
+p2 <- ggplot(aes(x = LoanStatus), data = Monthly_low) +
+  stat_count() +
+  ggtitle("Monthly pay back below 10%")
+
+library(gridExtra)
+grid.arrange(p1, p2, nrow = 2)
+```
+
+This plots of course seem quite in accord with intuition. People who had the payment-income rate over than 10% tended to be more in a situation of charged-off and defaulted than those who holded it 10% below. Interestingly, Completed status count was higher in the 'over 10% group'. I think that the heavy burdens for monthly repayments on them might stimulate to pay back their loans.
+
+## Bivariate Analytics Summary
+I showed some relations between loan status and other various variables. Especially, I could be noticed that Prosper approved many loans for those who are in low credit, and it might cause dangerous situation for them. Moverover, Prosper increased the lower line of intereset rates when there were many borrowers, regardless of their indivual situation.
+
+# Final Plots
+Because there are 113937 samples in the dataset, it is difficult to identify points when I plot points for continuous variables. So, for easy to see, I randomly sampled 1000 dataset.
+
+```{r}
+library(memisc)
+Monthly$LoanStatusSimple <- Monthly$LoanStatus
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (>120 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (1-15 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (16-30 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (31-60 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (61-90 days)"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Past Due (91-120 days)"] <- "Dangerous"
+
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Chargedoff"] <- "Dangerous"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Defaulted"] <- "Dangerous"
+
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "Completed"] <- "Safe"
+levels(Monthly$LoanStatusSimple)[levels(Monthly$LoanStatusSimple) == "FinalPaymentInProgress"] <- "Safe"
+
+set.seed(2002)
+monthly_samp <- Monthly[sample(1:length(Monthly$MonthlyLoanPayment), 1000), ]
+# MonthlyLoanPayment
+# LoanOriginalAmount
+# BorrowerAPR
+
+ggplot(aes(x = LoanOriginalAmount, y = BorrowerRate, colour = LoanStatusSimple), data = subset(monthly_samp, !is.na(LoanStatusSimple) & LoanStatusSimple != "Cancelled" & LoanStatusSimple != "Current" & LoanOriginalAmount <= 25000)) +
+  geom_point(alpha = 0.1, size = 3) +
+  geom_smooth(span = 0.9, se = FALSE) #method = 'lm'
+  #scale_color_brewer(type = 'div') #+
+  #xlim(0, 1000)
+  #scale_x_log10()
+```
+
+It seems there are aligned lines between the two groups. Regardless of loan original amount, the interest rates of people who were in dangerous situation (delayed payment, charged-off, and defaulted) are always higher than the interst rates of those in safe situation. Between two lines, there is a gap about 0.05. Higher interest rate might not a only causation for bad individual financial crisis.
+
+It's also possible that people might think they could repay their loans properly when they made a lone but they actually struggled to pay back after some period, because life isn't what they all think it will be. For those, monthly payments of a loan might be a heavy burden.
+
+```{r}
+#DebtToIncomeRatio
+ggplot(aes(x = LoanOriginalAmount, y = MonthlyPaymentAndImcomeRate, colour = LoanStatusSimple), data = subset(monthly_samp, !is.na(LoanStatusSimple) & LoanStatusSimple != "Cancelled" & LoanStatusSimple != "Current")) +
+  geom_point(alpha = 0.1, size = 3, position = 'jitter') +
+  geom_smooth(method = 'loess', span = 0.9, se = FALSE) +
+  #scale_color_brewer(type = 'div') #+
+  #ylim(0, 0.25) +
+  ylim(0, 0.5)
+  #scale_x_log10()
+```
+
+Unfortunately, there is not a great difference in the raio of monthly payment to monthly income in original small amount of loan in small loan original amount. However, the gap between two lines become larger as original amount of loan increases. Even though the small gap in small original amount of it, it's obvious people in financial crisis paid back more money for their loan.
+
+```{r}
+Monthly$OccupationSimple <- Monthly$Occupation
+
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) == "Student - College Freshman"] <- "Student"
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) == "Student - College Graduate Student"] <- "Student"
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) == "Student - College Junior"] <- "Student"
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) == "Student - College Senior"] <- "Student"
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) == "Student - College Sophomore"] <- "Student"
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) == "Student - Community College"] <- "Student"
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) == "Student - Technical School"] <- "Student"
+
+levels(Monthly$OccupationSimple)[levels(Monthly$OccupationSimple) != "Student"] <- "Job"
+
+ggplot(aes(x = LoanOriginalAmount, y = MonthlyPaymentAndImcomeRate, colour = OccupationSimple), 
+       data = subset(Monthly, OccupationSimple == c("Student", "Job") & LoanStatusSimple == "Dangerous")) +
+  ylim(0, 0.3) +
+  xlim(0, 15000) +
+  geom_point(alpha = 0.5, size = 3, position = 'jitter') +
+  geom_smooth(method = 'loess', span = 0.9, se = FALSE) +
+  scale_color_brewer(type = 'qual')
+```
+
+I showed students were likely to be in dangerous situation than other occupations in the previous session. This plot showed the relations between loan original amount and rate of monthly payment to monthly income rate. Unlikely to the people who have a job but in dangerous situation, students paid more monthly incomes for repayment of their loan. 
+
+# Reflection
+Through this project, I was able to explore Prosper Loan Data, and analysed loan statuses of borrowers with relating variables. I was noticed that dangerous loan status such as charged-off or defaulted is caused by loan's interest rate rather than its original amount. Also, many students are in dangerous situation and the amounts of monthly repayment is much higher than other occupation. However, there must be another factors for these findings. R command, ggpairs, may depit the ralations between factors. Therefore, based on the relations implied in the ggpairs, more variables that affects dangerous situations student's sturggles can be found.
